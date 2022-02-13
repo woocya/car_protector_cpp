@@ -21,7 +21,7 @@
 #define UART_PORT_NUM      (UART_NUM_1)
 #define UART_BAUD_RATE     (38400)
 //#define ECHO_TASK_STACK_SIZE    (CONFIG_EXAMPLE_TASK_STACK_SIZE)
-#define BUF_SIZE (1024)
+#define BUF_SIZE (10)
 
 class CarTalking {
 protected:
@@ -42,6 +42,6 @@ public:
 
     void uartRead();
 
-    void uartWrite(PId pid, char whatToWrite);
+    void uartWrite(PId pid);
 };
 

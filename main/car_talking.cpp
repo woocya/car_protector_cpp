@@ -9,20 +9,24 @@ CarTalking::CarTalking() {
 }
 
 bool CarTalking::checkConnection() {
-    PId getDevName(0, "ATZ", "get device name");
-    uartWrite(getDevName, 's');
+    PId getDevName("ATZ0x0D", "get device name");
+    uartWrite(getDevName);
     uartRead();
     return true;
 } 
 
 bool CarTalking::setProtocol() {
-    PId protocol(0, "ATSP2", "set protocol to SAE J1850 VPW (10.4 kbaud)");
-    uartWrite(protocol, 's');
+    PId protocol("ATSP20x0D", "set protocol to SAE J1850 VPW (10.4 kbaud)");
+    uartWrite(protocol);
     uartRead();
     return true;
 } //atsp2 lub atsp3   
 
-int CarTalking::getInfo(PId command, int expected_bits) {return 0;} 
+int CarTalking::getInfo(PId command, int expected_bits) {
+    uartWrite(command);
+    uartRead();
+    return 0;
+} 
 
 int CarTalking::translateInfo() {return 0;}
 
@@ -48,16 +52,15 @@ bool CarTalking::uartConfig() {
 }
 
 void CarTalking::uartRead() {    
+    uart_flush(UART_PORT_NUM);
+    int length = 0;
+    ESP_ERROR_CHECK(uart_get_buffered_data_len(UART_PORT_NUM, (size_t*)&length));
     // Read data from the UART
-    uart_read_bytes(UART_PORT_NUM, dataFromCar, BUF_SIZE, 20 / portTICK_RATE_MS);
+    uart_read_bytes(UART_PORT_NUM, dataFromCar, length, 20 / portTICK_RATE_MS);
 }
 
-void CarTalking::uartWrite(PId pid, char whatToWrite) {    
-    if (whatToWrite == 'h') {
-        dataForCar = (uint8_t *) pid.get_pid_hex();
-    }
-    else if (whatToWrite == 's') {
-        dataForCar = (uint8_t *) pid.get_pid_string();
-    }
+void CarTalking::uartWrite(PId pid) {    
+    uart_flush(UART_PORT_NUM);
+    dataForCar = (uint8_t *) pid.get_pid_message();
     uart_write_bytes(UART_PORT_NUM, (const char *) dataForCar, BUF_SIZE);
 }

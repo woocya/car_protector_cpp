@@ -1,17 +1,12 @@
 #include "pid.h"
 
-PId::PId(int pid_hex, const char* pid_string, const char* parameterName) {
-    this->pid_hex = pid_hex;
-    this->pid_string = pid_string;
+PId::PId(const char* pid_message, const char* parameterName) {
+    this->pid_message = pid_message;
     this->parameterName = parameterName;
 }
 
-int PId::get_pid_hex() {
-    return pid_hex;
-}
-
-const char* PId::get_pid_string() {
-    return pid_string;
+const char* PId::get_pid_message() {
+    return pid_message;
 }
 
 const char* PId::get_parameterName() {
