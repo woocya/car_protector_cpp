@@ -1,3 +1,6 @@
+#ifndef DATABASE_TALKING_H_
+#define DATABASE_TALKING_H_
+
 #include <iostream>
 #include <stdlib.h>
 
@@ -5,11 +8,13 @@ class DatabaseTalking {
 private:
 
 public:
-    int getRequestFromCar();
+    int GetRequestFromCar();
 
-    int sendRequestToCar();
+    int SendRequestToCar();
 
-    int getDataFromDatabase();
+    int GetDataFromDatabase();
 
-    int sendDataToDatabase();
+    int SendDataToDatabase();
 };
+
+#endif DATABASE_TALKING_H_

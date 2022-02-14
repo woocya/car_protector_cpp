@@ -2,35 +2,48 @@
 
 CarTalking::CarTalking() {
     // Configure a temporary buffer for the incoming data
-    dataFromCar = (uint8_t *) malloc(BUF_SIZE);
+    data_from_car = (uint8_t *) malloc(BUF_SIZE);
     
     // Configure a temporary buffer for the outcoming data
-    dataForCar = (uint8_t *) malloc(BUF_SIZE);
+    data_for_car = (uint8_t *) malloc(BUF_SIZE);
 }
 
-bool CarTalking::checkConnection() {
-    PId getDevName("ATZ0x0D", "get device name");
-    uartWrite(getDevName);
-    uartRead();
+CarTalking::~CarTalking() {
+    free(data_from_car);
+    free(data_for_car);
+}
+
+bool CarTalking::CheckConnection() {
+    PId get_dev_name(12, "ATZ0x0D", "get device name");
+    UartWrite(get_dev_name);
+    UartRead(12);
     return true;
 } 
 
-bool CarTalking::setProtocol() {
-    PId protocol("ATSP20x0D", "set protocol to SAE J1850 VPW (10.4 kbaud)");
-    uartWrite(protocol);
-    uartRead();
+bool CarTalking::SetProtocol() { //only use after turning echo off
+    PId protocol(0, "ATSP20x0D", "set protocol to SAE J1850 VPW (10.4 kbaud)");
+    UartWrite(protocol);
     return true;
 } //atsp2 lub atsp3   
 
-int CarTalking::getInfo(PId command, int expected_bits) {
-    uartWrite(command);
-    uartRead();
+bool CarTalking::TurnEchoOff() {
+    PId protocol(0, "ATE00x0D", "turn echo off");
+    UartWrite(protocol);
+    return true;
+}
+
+int CarTalking::GetInfo(PId command) {
+    UartWrite(command);
+    UartRead(command.GetPidExpectedBytes());
     return 0;
 } 
 
-int CarTalking::translateInfo() {return 0;}
+int CarTalking::TranslateInfo(PId sent_command) {
 
-bool CarTalking::uartConfig() {
+    return 0;
+}
+
+bool CarTalking::UartConfig() {
     uart_config_t uart_config = {
         .baud_rate = UART_BAUD_RATE,
         .data_bits = UART_DATA_8_BITS,
@@ -51,16 +64,18 @@ bool CarTalking::uartConfig() {
     return true;
 }
 
-void CarTalking::uartRead() {    
+int CarTalking::UartRead(int expected_bytes) {    
     uart_flush(UART_PORT_NUM);
     int length = 0;
-    ESP_ERROR_CHECK(uart_get_buffered_data_len(UART_PORT_NUM, (size_t*)&length));
+    //check how many bytes waiting in the buffer
+    //ESP_ERROR_CHECK(uart_get_buffered_data_len(UART_PORT_NUM, (size_t*)&length));
     // Read data from the UART
-    uart_read_bytes(UART_PORT_NUM, dataFromCar, length, 20 / portTICK_RATE_MS);
+    uart_read_bytes(UART_PORT_NUM, data_from_car, expected_bytes, 20 / portTICK_RATE_MS);
+    return length;
 }
 
-void CarTalking::uartWrite(PId pid) {    
-    uart_flush(UART_PORT_NUM);
-    dataForCar = (uint8_t *) pid.get_pid_message();
-    uart_write_bytes(UART_PORT_NUM, (const char *) dataForCar, BUF_SIZE);
+void CarTalking::UartWrite(PId pid) {    //add checking for prompt character (">" - hex 3E)
+    uart_flush(UART_PORT_NUM); //flush buffer to be sure 
+    data_for_car = (uint8_t *) pid.GetPidCommand();
+    uart_write_bytes(UART_PORT_NUM, (const char *) data_for_car, BUF_SIZE);
 }

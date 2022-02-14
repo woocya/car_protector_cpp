@@ -1,6 +1,8 @@
 // 1. atz (odpowiedz sugeruje ze polaczenie modulu jest ok)
 // 2. atsp2 lub atsp3 (ustawienie odpowiedniego protokolu)
 // 3. 
+#ifndef CAR_TALKING_H_
+#define CAR_TALKING_H_
 
 #include <vector>
 #include <stdio.h>
@@ -25,23 +27,28 @@
 
 class CarTalking {
 protected:
-    uint8_t* dataFromCar;
-    uint8_t* dataForCar;
+    uint8_t* data_from_car;
+    uint8_t* data_for_car;
 public:
     CarTalking();
 
-    bool checkConnection();
+    ~CarTalking();
 
-    bool setProtocol(); //atsp2 lub atsp3   
+    bool CheckConnection();
 
-    int getInfo(PId command, int expected_bits); 
+    bool SetProtocol(); //atsp2 lub atsp3   
 
-    int translateInfo(); 
+    bool TurnEchoOff();
 
-    bool uartConfig();
+    int GetInfo(PId command); 
 
-    void uartRead();
+    int TranslateInfo(PId sent_command); 
 
-    void uartWrite(PId pid);
+    bool UartConfig();
+
+    int UartRead(int expected_bytes);
+
+    void UartWrite(PId pid);
 };
 
+#endif CAR_TALKING_H_
