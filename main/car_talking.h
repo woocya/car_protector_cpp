@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <stdio.h>
+#include <cstring>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "driver/uart.h"
@@ -23,32 +24,29 @@
 #define UART_PORT_NUM      (UART_NUM_1)
 #define UART_BAUD_RATE     (38400)
 //#define ECHO_TASK_STACK_SIZE    (CONFIG_EXAMPLE_TASK_STACK_SIZE)
-#define BUF_SIZE (10)
+#define IN_BUF_SIZE (14) // max for response is 12 + "\r" + ">"
+#define OUT_BUF_SIZE (4)
 
 class CarTalking {
 protected:
     uint8_t* data_from_car;
     uint8_t* data_for_car;
 public:
-    CarTalking();
+    int CountBytes();
 
-    ~CarTalking();
+    bool TalkToObd(PId command_to_send); //send commands to and receive data from obd
 
-    bool CheckConnection();
+    void CheckPidsSupported(uint8_t* command_set, int size); // check if given vehicle support necessary pids
 
-    bool SetProtocol(); //atsp2 lub atsp3   
+    int GetCarInfo(PId command_to_send); // obtain desired data from a vehicle
 
-    bool TurnEchoOff();
+    float TranslateInfo(PId sent_command); // convert received from a vehicle data into information
 
-    int GetInfo(PId command); 
+    bool UartConfig(); // configure uart connection
 
-    int TranslateInfo(PId sent_command); 
+    bool UartRead(int expected_bytes); // read data with uart
 
-    bool UartConfig();
-
-    int UartRead(int expected_bytes);
-
-    void UartWrite(PId pid);
+    bool UartWrite(PId pid, int bytes_from_last_response); // write commands with uart
 };
 
 #endif CAR_TALKING_H_

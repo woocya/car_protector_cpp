@@ -1,49 +1,83 @@
 #include "car_talking.h"
 
 CarTalking::CarTalking() {
-    // Configure a temporary buffer for the incoming data
-    data_from_car = (uint8_t *) malloc(BUF_SIZE);
+    // Configure buffer for the incoming data
+    uint8_t d_from_c[IN_BUF_SIZE];
+    std::fill_n(d_from_c[0], IN_BUF_SIZE-1, 0);
+    data_from_car = &d_from_c[0];
     
-    // Configure a temporary buffer for the outcoming data
-    data_for_car = (uint8_t *) malloc(BUF_SIZE);
+    // Configure buffer for the outcoming data
+    uint8_t d_for_c[OUT_BUF_SIZE];
+    std::fill_n(d_for_c[0], OUT_BUF_SIZE-1, 0);
+    data_for_car = &d_for_c[0];
 }
 
-CarTalking::~CarTalking() {
-    free(data_from_car);
-    free(data_for_car);
+int CarTalking::CountBytes() { // idk if it's a good idea
+    int how_many = 0;
+    for (int i = 0; i < IN_BUF_SIZE; i++) {
+        how_many++;
+        if (data_from_car[i] == 0x0D) {
+            return how_many;
+        }
+    }
+    return -1;
 }
 
-bool CarTalking::CheckConnection() {
-    PId get_dev_name(12, "ATZ0x0D", "get device name");
-    UartWrite(get_dev_name);
-    UartRead(12);
-    return true;
-} 
+bool CarTalking::TalkToObd(PId command_to_send) { // better bool or void?
 
-bool CarTalking::SetProtocol() { //only use after turning echo off
-    PId protocol(0, "ATSP20x0D", "set protocol to SAE J1850 VPW (10.4 kbaud)");
-    UartWrite(protocol);
-    return true;
-} //atsp2 lub atsp3   
-
-bool CarTalking::TurnEchoOff() {
-    PId protocol(0, "ATE00x0D", "turn echo off");
-    UartWrite(protocol);
+    UartWrite(command_to_send, c);
+    if (command_to_send.GetPidExpectedBytes() > 0) {
+        UartRead(command_to_send.GetPidExpectedBytes());
+    }    
     return true;
 }
 
-int CarTalking::GetInfo(PId command) {
-    UartWrite(command);
-    UartRead(command.GetPidExpectedBytes());
+int CarTalking::GetCarInfo(PId command_to_send) {
+    UartWrite(command_to_send);
+    UartRead(command_to_send.GetPidExpectedBytes());
     return 0;
 } 
 
-int CarTalking::TranslateInfo(PId sent_command) {
-
+float CarTalking::TranslateInfo(PId sent_command) { //could be done better if usage of some other container than plain array would be reasonably possible
+    if (strcmp(sent_command.GetPidCommand(), "0x01000D")) {
+        uint8_t command_set[3] = {12, 13, 31};
+        uint8_t* command_set_ptr = &command_set[0];
+        CarTalking::CheckPidsSupported(command_set_ptr, 3);
+    }
+    else if (strcmp(sent_command.GetPidCommand(), "0x01200D")) {
+        uint8_t command_set = 15;
+        uint8_t* command_set_ptr = &command_set;
+        CarTalking::CheckPidsSupported(command_set_ptr, 1);
+    }
+    else if (strcmp(sent_command.GetPidCommand(), "0x010C0D")) {
+        return ((float) data_from_car[0] * 256 + (float) data_from_car[1]) / 4;
+    }
+    else if (strcmp(sent_command.GetPidCommand(), "0x010D0D")) {
+        return (float) data_from_car[0];
+    }
+    else if (strcmp(sent_command.GetPidCommand(), "0x011F0D")) {
+        return (float) data_from_car[0] * 256 + (float) data_from_car[1];
+    }
+    else if (strcmp(sent_command.GetPidCommand(), "0x012F0D")) {
+        return ((float) data_from_car[0] * 100) / 255;
+    }
     return 0;
 }
 
-bool CarTalking::UartConfig() {
+void CarTalking::CheckPidsSupported(uint8_t* command_set, int size) {
+    uint8_t* supported_commands = (uint8_t*) data_from_car;
+    for (int i = 0; i < size; i++) {
+        if ((supported_commands[command_set[i] / 8] >> (command_set[i] % 8)) & 1) {
+            if (size == 1) {
+                active_pids |= checked_pids[3];
+                return;
+            }
+            active_pids |= checked_pids[i];
+        }
+    }
+}
+
+bool CarTalking::UartConfig() { // taken from esp examples
     uart_config_t uart_config = {
         .baud_rate = UART_BAUD_RATE,
         .data_bits = UART_DATA_8_BITS,
@@ -58,24 +92,31 @@ bool CarTalking::UartConfig() {
     intr_alloc_flags = ESP_INTR_FLAG_IRAM;
 #endif
 
-    ESP_ERROR_CHECK(uart_driver_install(UART_PORT_NUM, BUF_SIZE * 2, 0, 0, NULL, intr_alloc_flags));
+    ESP_ERROR_CHECK(uart_driver_install(UART_PORT_NUM, IN_BUF_SIZE * 2, 0, 0, NULL, intr_alloc_flags));
     ESP_ERROR_CHECK(uart_param_config(UART_PORT_NUM, &uart_config));
     ESP_ERROR_CHECK(uart_set_pin(UART_PORT_NUM, UART_TXD_PIN_NUM, UART_RXD_PIN_NUM, UART_RTS_PIN_NUM, UART_CTS_PIN_NUM));
     return true;
 }
 
-int CarTalking::UartRead(int expected_bytes) {    
+bool CarTalking::UartRead(int expected_bytes) {    
     uart_flush(UART_PORT_NUM);
-    int length = 0;
+    // int length = 0;
     //check how many bytes waiting in the buffer
     //ESP_ERROR_CHECK(uart_get_buffered_data_len(UART_PORT_NUM, (size_t*)&length));
     // Read data from the UART
     uart_read_bytes(UART_PORT_NUM, data_from_car, expected_bytes, 20 / portTICK_RATE_MS);
-    return length;
+    // return length;
+    return true;
 }
 
-void CarTalking::UartWrite(PId pid) {    //add checking for prompt character (">" - hex 3E)
-    uart_flush(UART_PORT_NUM); //flush buffer to be sure 
+bool CarTalking::UartWrite(PId pid, int bytes_from_last_response) {    
+    if (data_from_car[bytes_from_last_response + 2] != 0x3E) { //added checking for prompt character (">" - hex 3E)
+        while (data_from_car[0] != 0x3E) { // maybe rtos can help with it
+            uart_read_bytes(UART_PORT_NUM, data_from_car, 1, 20 / portTICK_RATE_MS);
+        }
+    }
     data_for_car = (uint8_t *) pid.GetPidCommand();
-    uart_write_bytes(UART_PORT_NUM, (const char *) data_for_car, BUF_SIZE);
+    uart_flush(UART_PORT_NUM); //flush buffer to be sure there's no accidental garbage
+    uart_write_bytes(UART_PORT_NUM, (const char *) data_for_car, OUT_BUF_SIZE);
+    return true;
 }
