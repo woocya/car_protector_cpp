@@ -24,13 +24,14 @@
 #define UART_PORT_NUM      (UART_NUM_1)
 #define UART_BAUD_RATE     (38400)
 //#define ECHO_TASK_STACK_SIZE    (CONFIG_EXAMPLE_TASK_STACK_SIZE)
-#define IN_BUF_SIZE (14) // max for response is 12 + "\r" + ">"
+#define IN_BUF_SIZE (100) // max for response is 12 + "\r" + ">"
 #define OUT_BUF_SIZE (4)
 
 class CarTalking {
 protected:
     uint8_t* data_from_car;
     uint8_t* data_for_car;
+    uint8_t is_prompt_char;
 public:
     int CountBytes();
 
@@ -44,9 +45,9 @@ public:
 
     bool UartConfig(); // configure uart connection
 
-    bool UartRead(int expected_bytes); // read data with uart
+    int UartRead(int expected_bytes); // read data with uart
 
-    bool UartWrite(PId pid, int bytes_from_last_response); // write commands with uart
+    bool UartWrite(PId pid); // write commands with uart
 };
 
 #endif CAR_TALKING_H_

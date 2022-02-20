@@ -1,6 +1,7 @@
 #include "car_talking.h"
 
 CarTalking::CarTalking() {
+    is_prompt_char = 0;
     // Configure buffer for the incoming data
     uint8_t d_from_c[IN_BUF_SIZE];
     std::fill_n(d_from_c[0], IN_BUF_SIZE-1, 0);
@@ -25,7 +26,7 @@ int CarTalking::CountBytes() { // idk if it's a good idea
 
 bool CarTalking::TalkToObd(PId command_to_send) { // better bool or void?
 
-    UartWrite(command_to_send, c);
+    UartWrite(command_to_send);
     if (command_to_send.GetPidExpectedBytes() > 0) {
         UartRead(command_to_send.GetPidExpectedBytes());
     }    
@@ -98,25 +99,47 @@ bool CarTalking::UartConfig() { // taken from esp examples
     return true;
 }
 
-bool CarTalking::UartRead(int expected_bytes) {    
+int CarTalking::UartRead(int expected_bytes) {    
+    is_prompt_char = 0;
     uart_flush(UART_PORT_NUM);
-    // int length = 0;
+    int length = 0;
     //check how many bytes waiting in the buffer
-    //ESP_ERROR_CHECK(uart_get_buffered_data_len(UART_PORT_NUM, (size_t*)&length));
+    ESP_ERROR_CHECK(uart_get_buffered_data_len(UART_PORT_NUM, (size_t*)&length));
+    if (length >= IN_BUF_SIZE) { 
+        return -1; // too little buffer
+    }
     // Read data from the UART
-    uart_read_bytes(UART_PORT_NUM, data_from_car, expected_bytes, 20 / portTICK_RATE_MS);
-    // return length;
-    return true;
-}
-
-bool CarTalking::UartWrite(PId pid, int bytes_from_last_response) {    
-    if (data_from_car[bytes_from_last_response + 2] != 0x3E) { //added checking for prompt character (">" - hex 3E)
-        while (data_from_car[0] != 0x3E) { // maybe rtos can help with it
-            uart_read_bytes(UART_PORT_NUM, data_from_car, 1, 20 / portTICK_RATE_MS);
+    uart_read_bytes(UART_PORT_NUM, data_from_car, length, 20 / portTICK_RATE_MS);
+    if (data_from_car[length-4] == 0x0D && data_from_car[length-3] == 0x0A) { // "\r\n"
+        if (data_from_car[length-2] == 0x3E && data_from_car[length-1] == 0x0D) { // ">\r" (is there \r at the end for sure???)
+            is_prompt_char = 1;
         }
     }
+    else if (data_from_car[length-2] != 0x0D && data_from_car[length-1] != 0x0A) {
+        return -1; // no end of message - what then?
+    }
+    
+    std::fill_n(data_from_car[length-1], IN_BUF_SIZE-1, 0);
+    return length;
+}
+
+bool CarTalking::UartWrite(PId pid) {    
+    uint8_t temp_buffor[4];
+    int temp_length = 0;
+    ESP_ERROR_CHECK(uart_get_buffered_data_len(UART_PORT_NUM, (size_t*)&temp_length));
+    uart_read_bytes(UART_PORT_NUM, temp_buffor, temp_length, 20 / portTICK_RATE_MS);
+    if (is_prompt_char == 0) {
+        while (temp_buffor[temp_length-2] != 0x3E && temp_buffor[temp_length-1] != 0x0D) { // wait for prompt character
+            // wait for some time first
+            ESP_ERROR_CHECK(uart_get_buffered_data_len(UART_PORT_NUM, (size_t*)&temp_length));
+            uart_read_bytes(UART_PORT_NUM, temp_buffor, temp_length, 20 / portTICK_RATE_MS);
+        }
+    }
+    
     data_for_car = (uint8_t *) pid.GetPidCommand();
     uart_flush(UART_PORT_NUM); //flush buffer to be sure there's no accidental garbage
     uart_write_bytes(UART_PORT_NUM, (const char *) data_for_car, OUT_BUF_SIZE);
     return true;
 }
+
+// ustawić duży bufor, brać wszystko a potem czytać do /r i >, potem ew. zerować resztę
