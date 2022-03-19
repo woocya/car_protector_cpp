@@ -99,7 +99,9 @@ bool CarTalking::UartConfig() { // taken from esp examples
     return true;
 }
 
-int CarTalking::UartRead(int expected_bytes) {    
+int CarTalking::UartRead(int expected_bytes) {  
+    int is_end_of_message = 0;
+    int chars_left_in_buffer = 0;
     is_prompt_char = 0;
     uart_flush(UART_PORT_NUM);
     int length = 0;
@@ -110,29 +112,34 @@ int CarTalking::UartRead(int expected_bytes) {
     }
     // Read data from the UART
     uart_read_bytes(UART_PORT_NUM, data_from_car, length, 20 / portTICK_RATE_MS);
-    if (data_from_car[length-4] == 0x0D && data_from_car[length-3] == 0x0A) { // "\r\n"
-        if (data_from_car[length-2] == 0x3E && data_from_car[length-1] == 0x0D) { // ">\r" (is there \r at the end for sure???)
-            is_prompt_char = 1;
+    for (int i=0; i<length; i++) {
+        if (data_from_car[i] == 0x0D && data_from_car[i+1] == 0x0A) { // "\r\n"
+            is_end_of_message = 1;
+            if (data_from_car[i+2] == 0x3E && data_from_car[i+3] == 0x0D) { // ">\r" (is there \r at the end for sure???)
+                is_prompt_char = 1;
+            }
+            chars_left_in_buffer = length - i+1; //for debugging
         }
     }
-    else if (data_from_car[length-2] != 0x0D && data_from_car[length-1] != 0x0A) {
-        return -1; // no end of message - what then?
-    }
     
+    if (is_end_of_message == 0) {
+        return -1; // no end of message - what then? then repeat reading from parent function
+    }
+
     std::fill_n(data_from_car[length-1], IN_BUF_SIZE-1, 0);
     return length;
 }
 
 bool CarTalking::UartWrite(PId pid) {    
-    uint8_t temp_buffor[4];
-    int temp_length = 0;
-    ESP_ERROR_CHECK(uart_get_buffered_data_len(UART_PORT_NUM, (size_t*)&temp_length));
-    uart_read_bytes(UART_PORT_NUM, temp_buffor, temp_length, 20 / portTICK_RATE_MS);
     if (is_prompt_char == 0) {
-        while (temp_buffor[temp_length-2] != 0x3E && temp_buffor[temp_length-1] != 0x0D) { // wait for prompt character
+        int temp_length = 0;
+        uint8_t temp_buffor[2];
+        while (temp_buffor[0] != 0x3E && temp_buffor[1] != 0x0D) { // wait for prompt character
             // wait for some time first
             ESP_ERROR_CHECK(uart_get_buffered_data_len(UART_PORT_NUM, (size_t*)&temp_length));
-            uart_read_bytes(UART_PORT_NUM, temp_buffor, temp_length, 20 / portTICK_RATE_MS);
+            if (temp_length > 0) {
+                uart_read_bytes(UART_PORT_NUM, temp_buffor, temp_length, 20 / portTICK_RATE_MS);
+            }
         }
     }
     
@@ -142,4 +149,5 @@ bool CarTalking::UartWrite(PId pid) {
     return true;
 }
 
-// ustawić duży bufor, brać wszystko a potem czytać do /r i >, potem ew. zerować resztę
+// ustawić duży bufor, brać wszystko a potem czytać do /r i >, potem ew. zerować resztę - zrobione
+// uart read - chyba lepiej pętla dla sprawdzania końca linii - zrobione
