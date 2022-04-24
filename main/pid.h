@@ -36,6 +36,6 @@ public:
     std::string GetParameterName();
 };
 
-
+//deprecated
 
 #endif PID_H_
