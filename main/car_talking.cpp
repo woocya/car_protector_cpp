@@ -1,20 +1,52 @@
 #include "car_talking.h"
 
 CarTalking::CarTalking(int where): UartTalk(where) {
-    UartTalk talker(UART_OBD_PORT_NUM);
+    //UartTalk talker(UART_OBD_PORT_NUM);
 }
 
-bool CarTalking::GetObdStarted(const char* command_to_send, int expected_bytes) {
-    char * device_name = "cokolwiek";
+bool CarTalking::GetObdStarted() {
+    const char * device_name = "ELM327 v1.5"; //is it for sure?
     int data_length = -1;
     while (data_length != -1) {
-        ReadAndProcessMessage(command_to_send, expected_bytes);
+        ReadAndProcessMessage("ATZ0x0D", 12);
     }
-    for (int i = 0; i < expected_bytes; i++) {
+    for (int i = 0; i < 12; i++) {
         if (device_name[i] != buffer[i]) {
             return false;
         }
     }
+
+    return true;
+}
+
+bool CarTalking::TurnEchoOff() {
+    const char * response = "OK";
+    int data_length = -1;
+    while (data_length != -1) {
+        ReadAndProcessMessage("ATSP30x0D", 2);
+    }
+    for (int i = 0; i < 2; i++) {
+        if (response[i] != buffer[i]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool CarTalking::SetProtocol() {
+    const char * response = "OK";
+    int data_length = -1;
+    while (data_length != -1) {
+        ReadAndProcessMessage("ATSP30x0D", 2);
+    }
+    for (int i = 0; i < 2; i++) {
+        if (response[i] != buffer[i]) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 bool CarTalking::AskPids1() {
@@ -92,7 +124,7 @@ void CarTalking::CheckPidsSupported(uint8_t* command_set, int size) {
 
 int CarTalking::ReadAndProcessMessage(const char* command_to_send, int expected_bytes) {  
     int is_end_of_message = 0;
-    int chars_left_in_buffer = 0;
+    //int chars_left_in_buffer = 0;
     int length = 0;
     while (length != 0) { //that seems like a terrible idea
         length = UartConversation(command_to_send, 500);
@@ -104,7 +136,7 @@ int CarTalking::ReadAndProcessMessage(const char* command_to_send, int expected_
             if (buffer[i+2] == 0x3E && buffer[i+3] == 0x0D) { // ">\r" (is there \r at the end for sure???)
                 is_prompt_char = 1;
             }
-            chars_left_in_buffer = length - i+1; //for debugging
+            //chars_left_in_buffer = length - i+1; //for debugging
         }
     }
     

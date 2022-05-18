@@ -17,4 +17,4 @@ public:
     int SendDataToDatabase();
 };
 
-#endif DATABASE_TALKING_H_
+#endif // DATABASE_TALKING_H_

@@ -4,21 +4,20 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "driver/uart.h"
-#include <memory>
 #include <string.h>
-#include <string>
 
 #include "uart_config.h"
 
 class UartTalk {
-protected:
+protected:    
     int where;
-    uint8_t* buffer;
 public:
+    uint8_t* buffer;
     UartTalk(int where);
     ~UartTalk();
     int UartConversation(const char *command, int wait_for);
+    int TalkAndCheck(const char *command, int wait_for, const char* response);
 };
 
 
-#endif UART_TALK_H_
+#endif // UART_TALK_H_

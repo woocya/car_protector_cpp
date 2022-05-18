@@ -1,7 +1,7 @@
 #include "uart_talk.h"
 
 UartTalk::UartTalk(int where) {
-    buffer = new uint8_t(UART_BUF_SIZE);
+    buffer = new uint8_t[UART_BUF_SIZE];
     this->where = where;
 }
 
@@ -11,15 +11,51 @@ UartTalk::~UartTalk() {
 
 int UartTalk::UartConversation(const char *command, int wait_for) {
     int len = 0;
+    //uint8_t *data = (uint8_t *) malloc(UART_BUF_SIZE);
 
     uart_write_bytes(where, command, strlen(command));
+
     vTaskDelay(wait_for / portTICK_PERIOD_MS);
         
     if (buffer != NULL) {
         ESP_ERROR_CHECK(uart_get_buffered_data_len(where, (size_t*)&len));
+
         uart_read_bytes(where, (void *)buffer, len, 20 / portTICK_RATE_MS);
-    }    
+
+        char arr[len];
+        for (int a = 0; a < len; a++) {
+            arr[a] = buffer[a];
+        }
+        // uart_read_bytes(where, (void *)data, len, 20 / portTICK_RATE_MS);
+
+        char * ch = (char *) malloc(sizeof(int));
+        sprintf(ch, "%d", len);
+        uart_write_bytes(UART_OBD_PORT_NUM, "\n\rbuffer with len ", 18);
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+        uart_write_bytes(UART_OBD_PORT_NUM, ch, sizeof(ch));
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+        uart_write_bytes(UART_OBD_PORT_NUM, " is:", 4);
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+        uart_write_bytes(UART_OBD_PORT_NUM, &arr, len);
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+        uart_write_bytes(UART_OBD_PORT_NUM, "end\n\r", 5);
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+    }
+    //free(data);
     return len;
 }
 
+
+int UartTalk::TalkAndCheck(const char *command, int wait_for, const char* response = NULL) {
+    int len = UartConversation(command, wait_for); //no idea???
+    // if (response != NULL) {
+    //     for (int i = 0; i < strlen(response); i++) {
+    //         if (response[i] != buffer[i]) {
+    //             return false;
+    //         }
+    //     }
+    // }
+    
+    return len;
+}
 //what to do if len == -1?
