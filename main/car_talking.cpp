@@ -126,7 +126,7 @@ int CarTalking::ReadAndProcessMessage(const char* command_to_send, int expected_
     int is_end_of_message = 0;
     //int chars_left_in_buffer = 0;
     int length = 0;
-    while (length != 0) { //that seems like a terrible idea
+    while (length == 0) { //that seems like a terrible idea
         length = UartConversation(command_to_send, 500);
     }
     
