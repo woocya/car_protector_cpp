@@ -15,12 +15,14 @@
 #include "gps_data_parsing.h"
 #include "uart_config.h"
 #include "car_talking.h"
+#include "database_talking.h"
 
 static void cos(void *arg) {
     uart_config();
 
     Sim sim(UART_SIM_PORT_NUM);
     GPSParsing gps(UART_SIM_PORT_NUM);
+    DatabaseTalking dt(UART_SIM_PORT_NUM);
     
     //vTaskDelay(5000 / portTICK_PERIOD_MS);
     // for (int a=0;a<10;a++) {
@@ -28,24 +30,28 @@ static void cos(void *arg) {
     //     vTaskDelay(500 / portTICK_PERIOD_MS);
     // }
     //vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+
     sim.InitializeSIM();
+    dt.ActivateGPRS();
+    dt.SendRequestToCar();
 
-    gps.ActivateGps();
-    gps.GetData();
-    gps.ParseData();
+    // gps.ActivateGps();
+    // gps.GetData();
+    // gps.ParseData();
 
-    int status = 3;
-    while (1) {
-        gps.GetData();
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-        gps.ParseData();
-        status = (int)gps.GetGNSSStatus();
+    // int status = 3;
+    // while (1) {
+    //     gps.GetData();
+    //     vTaskDelay(1000 / portTICK_PERIOD_MS);
+    //     gps.ParseData();
+    //     status = (int)gps.GetGNSSStatus();
         // char a = (char)gps.buffer[0];
         // char b = (char)gps.buffer[1];
         // uart_write_bytes(UART_OBD_PORT_NUM, "\nstart\n", 7);
         // uart_write_bytes(UART_OBD_PORT_NUM, (char *)gps.buffer, gps.len);
         // uart_write_bytes(UART_OBD_PORT_NUM, "\nend\n", 5);
-    }
+    //}
     // status = (int)gps.GetGNSSStatus();
     // char * ch = (char *) malloc(2);
     // sprintf(ch, "%d", status);

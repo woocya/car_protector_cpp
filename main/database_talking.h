@@ -4,13 +4,19 @@
 #include <iostream>
 #include <stdlib.h>
 
-class DatabaseTalking {
+#include "uart_talk.h"
+
+class DatabaseTalking: public UartTalk {
 private:
 
 public:
+    DatabaseTalking(int where);
+
+    void ActivateGPRS();
+
     int GetRequestFromCar();
 
-    int SendRequestToCar();
+    void SendRequestToCar(); //double lat, double lon
 
     int GetDataFromDatabase();
 
