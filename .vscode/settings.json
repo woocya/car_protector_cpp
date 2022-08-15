@@ -63,7 +63,9 @@
     "streambuf": "cpp",
     "thread": "cpp",
     "typeinfo": "cpp",
-    "sdkconfig.h": "c"
+    "sdkconfig.h": "c",
+    "gpio.h": "c",
+    "*.ipp": "cpp"
   },
   "cmake.configureOnOpen": true
 }

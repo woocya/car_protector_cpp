@@ -54,6 +54,3 @@ void Sim::SendPackage(int length, const char* what_to_send) {
     TalkAndCheck(command, 5000, "SEND OK");
     free(command);
 }
-// int Sim::ReceivePackage() {
-
-// }
