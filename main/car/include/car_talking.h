@@ -31,7 +31,7 @@ public:
 
     bool GetObdStarted();
 
-    int TurnEchoOff();
+    bool TurnEchoOff();
 
     bool SetProtocol();
 

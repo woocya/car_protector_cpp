@@ -54,9 +54,12 @@ static void cos(void *arg) {
 
 
     sim.InitializeSIM();
-    sim.SendSMS("Sim initialized.");
-    int a = ct.TurnEchoOff();
-    sim.SendSMS(std::to_string(a).c_str());
+    //sim.SendSMS("Sim initialized.");
+    // char a = ct.TurnEchoOff();
+    // sim.SendSMS(a);
+    if (ct.TurnEchoOff() == true) {
+        //sim.SendSMS("Echo turned off.");
+    }
     //sim.SendSMS("Echo turned off.");
     if (ct.GetObdStarted() == true) {
         sim.SendSMS("Obd responded correctly.");

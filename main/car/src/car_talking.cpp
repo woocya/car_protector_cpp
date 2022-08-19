@@ -6,11 +6,11 @@ unsigned char CarTalking::active_pids[] = {0b0000'0000, 0b0000'0000, 0b0000'0000
 
 
 bool CarTalking::GetObdStarted() {
-    const char * device_name = "ELM327 v1.5\r\n>\r";
+    const char * device_name = "\r\nELM327 v1.5\r\n>\r";
     char buffer_to_read[15];
 
-    ReadAndProcessMessage("ATZ\r", 4, buffer_to_read, 15);
-    for (int i = 0; i < 15; i++) {
+    ReadAndProcessMessage("ATZ\r", 4, buffer_to_read, 17);
+    for (int i = 0; i < 17; i++) {
         if (device_name[i] != buffer_to_read[i]) {
             return false;
         }
@@ -19,20 +19,21 @@ bool CarTalking::GetObdStarted() {
     return true;
 }
 
-int CarTalking::TurnEchoOff() {
+bool CarTalking::TurnEchoOff() {
     int a = bt.Configure();
 
-    const char * response = "OK\r\n>\r";
+    const char * response = "ATE0\r\nOK\r\n>\r";
     char buffer_to_read[6];
 
-    ReadAndProcessMessage("ATE0\r", 5, buffer_to_read, 6);
-    for (int i = 0; i < 6; i++) {
+    ReadAndProcessMessage("ATE0\r", 5, buffer_to_read, 8);
+    uart_write_bytes(UART_OBD_PORT_NUM, buffer_to_read, 8);
+    for (int i = 0; i < 8; i++) {
         if (response[i] != buffer_to_read[i]) {
-            return i+10;
+            return false;
         }
     }
 
-    return a;
+    return true;
 }
 
 bool CarTalking::SetProtocol() {
@@ -119,33 +120,34 @@ void CarTalking::CheckPidsSupported(uint8_t* command_set, int size) {
 void CarTalking::ReadAndProcessMessage(const char* command_to_send, int len_of_command, char * buffer_to_read, int size_of_read_buffer) {  
     //int is_end_of_message = 0;
     //int chars_left_in_buffer = 0;
-    int length = bt.SendCommand(command_to_send, len_of_command);
+    int l;
+    l = bt.SendCommand(command_to_send, len_of_command);
 
     int i = 0;
     int num_of_chars = 0;
     int buffer_index = 0;
-    while(i < length) {
-        num_of_chars = 0;
+    // while(i < l) {
+    //     num_of_chars = 0;
 
-        if (buffer[i] == ':' && i + 6 < length) { // "\r\n"
-            //is_end_of_message = 1;
-            // if (buffer[i+2] == 0x3E && buffer[i+3] == 0x0D) { // ">\r" (is there \r at the end for sure???)
-            //     is_prompt_char = 1;
-            // }
-            //chars_left_in_buffer = length - i+1; //for debugging
+    //     if (buffer[i] == ':' && i + 6 < l) { // "\r\n"
+    //         //is_end_of_message = 1;
+    //         // if (buffer[i+2] == 0x3E && buffer[i+3] == 0x0D) { // ">\r" (is there \r at the end for sure???)
+    //         //     is_prompt_char = 1;
+    //         // }
+    //         //chars_left_in_buffer = length - i+1; //for debugging
 
-            num_of_chars = buffer[i+4];
-            for (int cnt = i+6; cnt < num_of_chars && cnt < length; cnt++) {
-                if (buffer_index < size_of_read_buffer) {
-                    buffer_to_read[buffer_index] = buffer[cnt];
-                    buffer_index++;
-                }
-            }
-        }
-        else {
-            i++;
-        }
-    }
+    //         num_of_chars = buffer[i+4];
+    //         for (int cnt = i+6; cnt < num_of_chars && cnt < l; cnt++) {
+    //             if (buffer_index < size_of_read_buffer) {
+    //                 buffer_to_read[buffer_index] = buffer[cnt];
+    //                 buffer_index++;
+    //             }
+    //         }
+    //     }
+    //     else {
+    //         i++;
+    //     }
+    // }
 }
 
 // ustawić duży bufor, brać wszystko a potem czytać do /r i >, potem ew. zerować resztę - zrobione

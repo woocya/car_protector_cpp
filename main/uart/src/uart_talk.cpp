@@ -22,10 +22,10 @@ int UartTalk::UartConversation(const char *command, int wait_for) {
 
         uart_read_bytes(where, (void *)buffer, len, 20 / portTICK_RATE_MS);
 
-        // char arr[len];
-        // for (int a = 0; a < len; a++) {
-        //     arr[a] = buffer[a];
-        // }
+        char arr[len];
+        for (int a = 0; a < len; a++) {
+            arr[a] = buffer[a];
+        }
         // uart_read_bytes(where, (void *)data, len, 20 / portTICK_RATE_MS);
 
         // char * ch = (char *) malloc(sizeof(int));
@@ -34,12 +34,12 @@ int UartTalk::UartConversation(const char *command, int wait_for) {
         // vTaskDelay(100 / portTICK_PERIOD_MS);
         // uart_write_bytes(UART_OBD_PORT_NUM, ch, sizeof(ch));
         // vTaskDelay(100 / portTICK_PERIOD_MS);
-        // uart_write_bytes(UART_OBD_PORT_NUM, " is:", 4);
-        // vTaskDelay(100 / portTICK_PERIOD_MS);
-        // uart_write_bytes(UART_OBD_PORT_NUM, &arr, len);
-        // vTaskDelay(100 / portTICK_PERIOD_MS);
-        // uart_write_bytes(UART_OBD_PORT_NUM, "end\n\r", 5);
-        // vTaskDelay(100 / portTICK_PERIOD_MS);
+        uart_write_bytes(UART_OBD_PORT_NUM, "buffer is:", 10);
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+        uart_write_bytes(UART_OBD_PORT_NUM, &arr, len);
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+        uart_write_bytes(UART_OBD_PORT_NUM, "end\n\r", 5);
+        vTaskDelay(100 / portTICK_PERIOD_MS);
     }
     //free(data);
     return len;

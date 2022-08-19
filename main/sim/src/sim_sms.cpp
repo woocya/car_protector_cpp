@@ -14,7 +14,7 @@ bool Sim::InitializeSIM() {
 
     // TalkAndCheck("AT+IPR=9600\r", 500, "OK");
     TalkAndCheck("AT\r", 500, "OK");
-    TalkAndCheck("ATE0\r", 500, "OK");
+    //TalkAndCheck("ATE0\r", 500, "OK");
 
     return true;
 }
