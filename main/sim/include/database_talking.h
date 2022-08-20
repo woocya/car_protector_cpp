@@ -16,7 +16,7 @@ public:
 
     int GetRequestFromCar();
 
-    void SendRequestToCar(); //double lat, double lon
+    void SendRequestToUser(); //double lat, double lon
 
     int GetDataFromDatabase();
 
