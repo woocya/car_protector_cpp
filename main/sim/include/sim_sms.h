@@ -21,7 +21,6 @@ public:
     bool InitializeGPRS();
     bool SendSMS(const char * what_to_send);
     void SendPackage(int length, const char* what_to_send);
-    // int ReceivePackage();
 };
 
 

@@ -33,8 +33,6 @@ bool Sim::SendSMS(const char * what_to_send) {
     Sim::TalkAndCheck("AT+CMGF=1\r", 500, "OK");
     Sim::TalkAndCheck("AT+CMGS=\"539399959\"\r", 500, ">");
 
-    // char* command = new char[strlen(what_to_send) + 1];
-    // sprintf(command, "%s%X", what_to_send, 0x1A);
     uint8_t ctrlz = 0x1A;
     TalkAndCheck(what_to_send, 5000, NULL);
     uart_write_bytes(UART_SIM_PORT_NUM, &ctrlz, 1);

@@ -9,11 +9,7 @@ void DatabaseTalking::ActivateGPRS() {
     DatabaseTalking::TalkAndCheck("AT+SAPBR=3,1,PWD,\"internet\"\r", 500, "OK");
 }
 
-void DatabaseTalking::SendRequestToUser() { //double lat, double lon
-    // std::string stringData = std::to_string(lat) + ";" + std::to_string(lon) + "\r";
-
-    // const char* data = stringData.c_str();
-
+void DatabaseTalking::SendRequestToUser() {
     DatabaseTalking::TalkAndCheck("AT+SAPBR=1,1\r", 500, "OK");
     DatabaseTalking::TalkAndCheck("AT+HTTPINIT\r", 500, "OK");
     DatabaseTalking::TalkAndCheck("AT+HTTPPARA=CID,1\r", 500, "OK");
