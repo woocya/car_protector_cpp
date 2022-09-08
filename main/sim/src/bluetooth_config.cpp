@@ -4,7 +4,7 @@ BluetoothConfig::BluetoothConfig(int where): UartTalk(where) {}
 
 int BluetoothConfig::Configure() {
     UartConversation("AT+BTPOWER=1\r\n", 1000); //UART_SIM_PORT_NUM
-    UartConversation("AT+BTUNPAIR=0\r\n", 5000);
+    UartConversation("AT+BTUNPAIR=0\r\n", 3000);
     int scan_length = UartConversation("AT+BTSCAN=1,10\r\n", 10000);
 
     int num_of_device = ParseScanning(scan_length);
@@ -41,13 +41,13 @@ int BluetoothConfig::ParseScanning(int scan_length) {
     return -1;
 }
 
-int BluetoothConfig::SendCommand(const char * command, int len_of_command) {
-    char * fullChar = (char *)malloc(15);
+std::pair<int, uint8_t*> BluetoothConfig::SendCommand(const char * command, int len_of_command, int wait_for) {
+    char * fullChar = (char *)malloc(15 + sizeof(int));
     sprintf(fullChar, "AT+BTSPPSEND=%d\r\n", len_of_command);
-    UartConversation(fullChar, 3000);
+    UartConversation(fullChar, 1000);
 
-    int len_of_response = UartConversation(command, 5000);
+    int len_of_response = UartConversation(command, wait_for);
 
     free(fullChar);
-    return len_of_response;
+    return std::pair(len_of_response, buffer);
 }

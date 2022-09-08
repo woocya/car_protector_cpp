@@ -25,9 +25,9 @@ protected:
     uint8_t is_prompt_char;
     BluetoothConfig bt;
 public:
-    CarTalking(int where): UartTalk(where), bt(UART_SIM_PORT_NUM) {}
+    CarTalking(int where): UartTalk(where), bt(where) {}
 
-    void ReadAndProcessMessage(const char* command_to_send, int len_of_command, char * buffer_to_read, int size_of_read_buffer); // read data with uart
+    void ReadAndProcessMessage(const char* command_to_send, int len_of_command, char * buffer_to_read, int size_of_read_buffer, int wait_for, bool skip_info = false); // read data with uart
 
     bool GetObdStarted();
 

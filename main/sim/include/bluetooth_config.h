@@ -16,7 +16,7 @@ public:
 
     int ParseScanning(int scan_length);
 
-    int SendCommand(const char * command, int len_of_command);
+    std::pair<int, uint8_t*> SendCommand(const char * command, int len_of_command, int wait_for);
 
     int ParseResponse(const char * expected_response);
 };

@@ -20,11 +20,6 @@
 #include "esp_http_client.h"
 #include "uart_config.h"
 
-/* Constants that aren't configurable in menuconfig */
-#define WEB_SERVER "http://testserver.aeq-web.com/sim800_test/sim800.php"
-#define WEB_PORT "80"
-#define WEB_PATH "/"
-
 #define MAX_HTTP_RECV_BUFFER 512
 #define MAX_HTTP_OUTPUT_BUFFER 2048
 static const char *TAG = "HTTP_CLIENT";
@@ -35,18 +30,28 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
     static int output_len;       // Stores number of bytes read
     switch(evt->event_id) {
         case HTTP_EVENT_ERROR:
+            uart_write_bytes(UART_OBD_PORT_NUM, "HTTP_EVENT_ERROR\r\n", 18);
+            vTaskDelay(500 / portTICK_PERIOD_MS);
             ESP_LOGD(TAG, "HTTP_EVENT_ERROR");
             break;
         case HTTP_EVENT_ON_CONNECTED:
+            uart_write_bytes(UART_OBD_PORT_NUM, "HTTP_EVENT_ON_CONNECTED\r\n", 25);
+            vTaskDelay(500 / portTICK_PERIOD_MS);
             ESP_LOGD(TAG, "HTTP_EVENT_ON_CONNECTED");
             break;
         case HTTP_EVENT_HEADER_SENT:
+            uart_write_bytes(UART_OBD_PORT_NUM, "HTTP_EVENT_HEADER_SENT\r\n", 24);
+            vTaskDelay(500 / portTICK_PERIOD_MS);
             ESP_LOGD(TAG, "HTTP_EVENT_HEADER_SENT");
             break;
         case HTTP_EVENT_ON_HEADER:
+            uart_write_bytes(UART_OBD_PORT_NUM, "HTTP_EVENT_ON_HEADER\r\n", 22);
+            vTaskDelay(500 / portTICK_PERIOD_MS);
             ESP_LOGD(TAG, "HTTP_EVENT_ON_HEADER, key=%s, value=%s", evt->header_key, evt->header_value);
             break;
         case HTTP_EVENT_ON_DATA:
+            uart_write_bytes(UART_OBD_PORT_NUM, "HTTP_EVENT_ON_DATA\r\n", 20);
+            vTaskDelay(500 / portTICK_PERIOD_MS);
             ESP_LOGD(TAG, "HTTP_EVENT_ON_DATA, len=%d", evt->data_len);
             /*
              *  Check for chunked encoding is added as the URL for chunked encoding used in this example returns binary data.
@@ -61,6 +66,8 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
                         output_buffer = (char *) malloc(esp_http_client_get_content_length(evt->client));
                         output_len = 0;
                         if (output_buffer == NULL) {
+                            uart_write_bytes(UART_OBD_PORT_NUM, "Failed to allocate memory for output buffer\r\n", 45);
+                            vTaskDelay(500 / portTICK_PERIOD_MS);
                             ESP_LOGE(TAG, "Failed to allocate memory for output buffer");
                             return ESP_FAIL;
                         }
@@ -72,6 +79,8 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
 
             break;
         case HTTP_EVENT_ON_FINISH:
+            uart_write_bytes(UART_OBD_PORT_NUM, "HTTP_EVENT_ON_FINISH\r\n", 22);
+            vTaskDelay(500 / portTICK_PERIOD_MS);
             ESP_LOGD(TAG, "HTTP_EVENT_ON_FINISH");
             if (output_buffer != NULL) {
                 // Response is accumulated in output_buffer. Uncomment the below line to print the accumulated response
@@ -82,6 +91,8 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
             output_len = 0;
             break;
         case HTTP_EVENT_DISCONNECTED:
+            uart_write_bytes(UART_OBD_PORT_NUM, "HTTP_EVENT_DISCONNECTED\r\n", 25);
+            vTaskDelay(500 / portTICK_PERIOD_MS);
             ESP_LOGI(TAG, "HTTP_EVENT_DISCONNECTED");
             // int mbedtls_err = 0;
             // esp_err_t err = esp_tls_get_and_clear_last_error(evt->data, &mbedtls_err, NULL);
@@ -110,8 +121,8 @@ static void http_rest_with_url(void)
      * If URL as well as host and path parameters are specified, values of host and path will be considered.
      */
     esp_http_client_config_t config = {
-        .host = "httpbin.org",
-        .path = "/get",
+        .host = "car-protector.herokuapp.com",
+        .path = "/getLimits",
         .query = "esp",
         .disable_auto_redirect = true,
         .event_handler = _http_event_handler,
@@ -122,13 +133,25 @@ static void http_rest_with_url(void)
     // GET
     esp_err_t err = esp_http_client_perform(client);
     if (err == ESP_OK) {
+        uart_write_bytes(UART_OBD_PORT_NUM, "it ok\r\n", 7);
+        vTaskDelay(500 / portTICK_PERIOD_MS);
         ESP_LOGI(TAG, "HTTP GET Status = %d, content_length = %d",
                 esp_http_client_get_status_code(client),
                 esp_http_client_get_content_length(client));
     } else {
+        uart_write_bytes(UART_OBD_PORT_NUM, "HTTP GET request failed\r\n", 25);
+        vTaskDelay(500 / portTICK_PERIOD_MS);
         ESP_LOGE(TAG, "HTTP GET request failed: %s", esp_err_to_name(err));
     }
-    uart_write_bytes(UART_OBD_PORT_NUM, local_response_buffer, strlen(local_response_buffer));
+    uart_write_bytes(UART_OBD_PORT_NUM, "response:\r\n", 11);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
+
+    int i=0;
+    while(local_response_buffer[i] != 0) {        
+        uart_write_bytes(UART_OBD_PORT_NUM, &local_response_buffer[i], 1);
+        ++i;
+    }
+    vTaskDelay(500 / portTICK_PERIOD_MS);
     //ESP_LOG_BUFFER_HEX(TAG, local_response_buffer, strlen(local_response_buffer));
 
     esp_http_client_cleanup(client);

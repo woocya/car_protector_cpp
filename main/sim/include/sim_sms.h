@@ -11,12 +11,14 @@
 #include "sdkconfig.h"
 
 #include "uart_talk.h"
+#include "car_talking.h"
 
 class Sim: public UartTalk {
 protected:
     char* server_name;
 public:
-    Sim(int where): UartTalk(where) {}
+    CarTalking ct;
+    Sim(int where): UartTalk(where), ct(where) {}
     bool InitializeSIM();
     bool InitializeGPRS();
     bool SendSMS(const char * what_to_send);

@@ -18,7 +18,7 @@ public:
 
     void SendRequestToUser(); //double lat, double lon
 
-    int GetDataFromDatabase();
+    void GetDataFromDatabase();
 
     int SendDataToDatabase();
 };
