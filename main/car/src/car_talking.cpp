@@ -6,7 +6,7 @@ unsigned char CarTalking::active_pids[] = {0b0000'0000, 0b0000'0000, 0b0000'0000
 
 
 bool CarTalking::GetObdStarted() {
-    const char * device_name = "\r\rOBDII  v1.5";
+    const char * device_name = "ATZ\rOBDII  v1.5";
     char buffer_to_read[13];
 
     ReadAndProcessMessage("ATZ\r", 4, buffer_to_read, 13, 1000);
@@ -23,8 +23,6 @@ bool CarTalking::GetObdStarted() {
 }
 
 bool CarTalking::TurnEchoOff() {
-    int a = bt.Configure();
-
     const char * response = "ATE0\rOK";
     char buffer_to_read[7];
 
@@ -61,7 +59,7 @@ bool CarTalking::AskPids1() {
     ReadAndProcessMessage("0100\r",5, buffer_to_read, 7, 8000);
     uint8_t command_set[3] = {12, 13, 31};
     for (int i = 0; i < 3; i++) {
-        if ((buffer_to_read[command_set[i] / 8] >> (command_set[i] % 8)) & 1) {
+        if ((buffer_to_read[(command_set[i] / 8) + 3] >> (command_set[i] % 8)) & 1) {
             active_pids[i] |= checked_pids[i];
         }
     }
@@ -73,7 +71,7 @@ bool CarTalking::AskPids2() {
 
     ReadAndProcessMessage("0120\r", 5, buffer_to_read, 7, 8000);
     uint8_t command_set = 15;
-    if ((buffer_to_read[command_set / 8] >> (command_set % 8)) & 1) {
+    if ((buffer_to_read[(command_set / 8) + 3] >> (command_set % 8)) & 1) {
         active_pids[3] |= checked_pids[3];
     }
     return true;
@@ -81,9 +79,28 @@ bool CarTalking::AskPids2() {
 
 float CarTalking::AskEngineSpeed() {
     char buffer_to_read[20];
+    std::string helper_string;
+    std::stringstream ss;
+    float first_number;
+    float second_number;
+
     ReadAndProcessMessage("010C\r", 5, buffer_to_read, 20, true, 15000);
 
-    return ((float) buffer_to_read[9] * 256 + (float) buffer_to_read[1]) / 4;
+    helper_string = buffer_to_read[4];
+    helper_string += buffer_to_read[5];
+
+    ss << std::hex << helper_string;
+    ss >> first_number;
+
+    ss.flush();
+
+    helper_string = buffer_to_read[7];
+    helper_string += buffer_to_read[8];
+
+    ss << std::hex << helper_string;
+    ss >> second_number;
+
+    return (first_number * 256 + second_number) / 4;
 }
 
 int CarTalking::AskVehicleSpeed() {
@@ -162,7 +179,7 @@ void CarTalking::ReadAndProcessMessage(const char* command_to_send, int len_of_c
                     if (skip_info) {
                         if (pair.second[cnt] == '4' && pair.second[cnt+1] == '1') {
                             skip_info = false;
-                            continue;
+                            cnt++;
                         }
                         else {
                             break;
@@ -179,6 +196,10 @@ void CarTalking::ReadAndProcessMessage(const char* command_to_send, int len_of_c
             i++;
         }
     }
+}
+
+void CarTalking::compareLimits() {
+
 }
 
 // ustawić duży bufor, brać wszystko a potem czytać do /r i >, potem ew. zerować resztę - zrobione

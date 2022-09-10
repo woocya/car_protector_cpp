@@ -16,9 +16,12 @@
 class Sim: public UartTalk {
 protected:
     char* server_name;
+    char telephone_number[9];
 public:
     CarTalking ct;
     Sim(int where): UartTalk(where), ct(where) {}
+
+    void setTelephoneNumber(const char telephone_number[9]);
     bool InitializeSIM();
     bool InitializeGPRS();
     bool SendSMS(const char * what_to_send);

@@ -22,16 +22,24 @@ void DatabaseTalking::SendRequestToUser() {
     DatabaseTalking::TalkAndCheck("AT+SAPBR=0,1\r", 500, "OK");
 }
 
-void DatabaseTalking::GetDataFromDatabase() {
+char * DatabaseTalking::GetDataFromDatabase() {
     DatabaseTalking::TalkAndCheck("AT+SAPBR=1,1\r", 500, "OK");
     DatabaseTalking::TalkAndCheck("AT+HTTPINIT\r", 500, "OK");
     DatabaseTalking::TalkAndCheck("AT+HTTPPARA=CID,1\r", 500, "OK");
     DatabaseTalking::TalkAndCheck("AT+HTTPPARA=URL,\"http://car-protector.herokuapp.com/getLimits\"\r", 500, "OK");
     DatabaseTalking::TalkAndCheck("AT+HTTPDATA=192,5000\r", 1000, "OK");
     DatabaseTalking::TalkAndCheck("AT+HTTPACTION=0\r", 5000, "OK");
-    DatabaseTalking::TalkAndCheck("AT+HTTPREAD\r", 3000, "OK");
+    int len = DatabaseTalking::TalkAndCheck("AT+HTTPREAD\r", 3000, "OK");
+
+    char response[len];
+    for (int i = 0; i < len; i++) {
+        response[i] = buffer[i];
+    }
+
     DatabaseTalking::TalkAndCheck("AT+HTTPTERM\r", 500, "OK");
     DatabaseTalking::TalkAndCheck("AT+SAPBR=0,1\r", 500, "OK");
+
+    return response;
 }
 
 int DatabaseTalking::SendDataToDatabase() {return 0;}

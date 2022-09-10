@@ -110,7 +110,7 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
     return ESP_OK;
 }
 
-static void http_rest_with_url(void)
+char * http_rest_with_url(void)
 {
     char local_response_buffer[MAX_HTTP_OUTPUT_BUFFER] = {0};
     /**
@@ -155,4 +155,5 @@ static void http_rest_with_url(void)
     //ESP_LOG_BUFFER_HEX(TAG, local_response_buffer, strlen(local_response_buffer));
 
     esp_http_client_cleanup(client);
+    return local_response_buffer;
 }

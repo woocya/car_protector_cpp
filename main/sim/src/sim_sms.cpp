@@ -28,10 +28,19 @@ bool Sim::InitializeGPRS() {
     return true;
 }
 
+void Sim::setTelephoneNumber(const char* telephone_number) {
+    int i = 0;
+    while (i != 9) {
+        this->telephone_number[i] = telephone_number[i];
+    }
+}
+
 bool Sim::SendSMS(const char * what_to_send) {
     Sim::TalkAndCheck("AT+CSCA=\"+48501200777\"\r", 500, "OK");
     Sim::TalkAndCheck("AT+CMGF=1\r", 500, "OK");
-    Sim::TalkAndCheck("AT+CMGS=\"539399959\"\r", 500, ">");
+    char * ch;
+    sprintf(ch, "AT+CMGS=\"%s\"\r", telephone_number);
+    Sim::TalkAndCheck(ch, 500, ">");
 
     uint8_t ctrlz = 0x1A;
     TalkAndCheck(what_to_send, 5000, NULL);

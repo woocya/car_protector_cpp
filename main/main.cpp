@@ -1,11 +1,3 @@
-/* Hello World Example
-
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
-
-   Unless required by applicable law or agreed to in writing, this
-   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied.
-*/
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -54,13 +46,13 @@ static void cos(void *arg) {
     // //sim.SendSMS("Sim initialized.");
     // // char a = ct.TurnEchoOff();
     // // sim.SendSMS(a);
-    if (sim.ct.TurnEchoOff() == true) {
-      uart_write_bytes(UART_OBD_PORT_NUM, "####### works\r\n", 16);
-        //sim.SendSMS("Echo turned off.");
-    }
+    // if (sim.ct.TurnEchoOff() == true) {
+    //   uart_write_bytes(UART_OBD_PORT_NUM, "####### works\r\n", 16);
+    //     //sim.SendSMS("Echo turned off.");
+    // }
     // //sim.SendSMS("Echo turned off.");
     if (sim.ct.GetObdStarted() == true) {
-      uart_write_bytes(UART_OBD_PORT_NUM, "Success!!!\r\n", 13);
+      uart_write_bytes(UART_OBD_PORT_NUM, "Success!!!\r\n", 12);
       //  sim.SendSMS("Obd responded correctly.");
     }
 
