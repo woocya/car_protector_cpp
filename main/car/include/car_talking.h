@@ -22,34 +22,33 @@
 class CarTalking: UartTalk {
 protected:
     static unsigned char checked_pids[4]; 
-    static unsigned char active_pids[4]; 
-    uint8_t is_prompt_char;
+    static unsigned char active_pids[4];
 public:
-    CarTalking(int where): UartTalk(where), bt(where) {
-  
-        int a = bt.Configure();
-    }
+    CarTalking(int where): UartTalk(where), bt(where) {}
 
     BluetoothConfig bt;
-    
+
+    void configureBluetooth();
+
     void ReadAndProcessMessage(const char* command_to_send, int len_of_command, char * buffer_to_read, int size_of_read_buffer, int wait_for, bool skip_info = false); // read data with uart
 
     bool GetObdStarted();
 
-    bool TurnEchoOff();
-
     bool SetProtocol();
+
+    void CheckAvailableParams();
 
     void CheckPidsSupported(uint8_t* command_set, int size); // check if given vehicle support necessary pids
 
     bool AskPids1();
     bool AskPids2();
+
+    unsigned char* getActivePids();
+
     float AskEngineSpeed();
     int AskVehicleSpeed();
-    float AskRuntime();
+    int AskRuntime();
     float AskFuelLevel();
-
-    void compareLimits();
 };
 
 #endif // CAR_TALKING_H_

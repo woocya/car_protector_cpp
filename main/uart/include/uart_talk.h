@@ -16,7 +16,6 @@ public:
     UartTalk(int where);
     ~UartTalk();
     int UartConversation(const char *command, int wait_for);
-    int TalkAndCheck(const char *command, int wait_for, const char* response);
 };
 
 

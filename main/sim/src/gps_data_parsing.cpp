@@ -4,11 +4,11 @@ GPSParsing::GPSParsing(int where): UartTalk(where) {
 }
 
 void GPSParsing::ActivateGps() {
-    len = GPSParsing::TalkAndCheck("AT+CGNSPWR=1\r", 500, "OK");
+    len = GPSParsing::UartConversation("AT+CGNSPWR=1\r", 500);
 }
 
 void GPSParsing::GetData() {
-    len = GPSParsing::TalkAndCheck("AT+CGNSINF\r", 10000, NULL);
+    len = GPSParsing::UartConversation("AT+CGNSINF\r", 10000);
 }
 
 void GPSParsing::ParseData() {

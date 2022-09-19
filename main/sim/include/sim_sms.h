@@ -21,11 +21,9 @@ public:
     CarTalking ct;
     Sim(int where): UartTalk(where), ct(where) {}
 
-    void setTelephoneNumber(const char telephone_number[9]);
+    void SetTelephoneNumber(const char telephone_number[9]);
     bool InitializeSIM();
-    bool InitializeGPRS();
     bool SendSMS(const char * what_to_send);
-    void SendPackage(int length, const char* what_to_send);
 };
 
 

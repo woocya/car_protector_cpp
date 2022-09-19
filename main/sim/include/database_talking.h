@@ -2,6 +2,7 @@
 #define DATABASE_TALKING_H_
 
 #include <iostream>
+#include <sstream>
 #include <stdlib.h>
 
 #include "uart_talk.h"
@@ -14,13 +15,9 @@ public:
 
     void ActivateGPRS();
 
-    int GetRequestFromCar();
-
-    void SendRequestToUser(); //double lat, double lon
-
     char * GetDataFromDatabase();
 
-    int SendDataToDatabase();
+    int SendDataToDatabase(const char * message);//double lat, double lon
 };
 
 #endif // DATABASE_TALKING_H_

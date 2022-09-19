@@ -51,6 +51,8 @@ static void cos(void *arg) {
     //     //sim.SendSMS("Echo turned off.");
     // }
     // //sim.SendSMS("Echo turned off.");
+    sim.ct.configureBluetooth();
+
     if (sim.ct.GetObdStarted() == true) {
       uart_write_bytes(UART_OBD_PORT_NUM, "Success!!!\r\n", 12);
       //  sim.SendSMS("Obd responded correctly.");
@@ -58,12 +60,20 @@ static void cos(void *arg) {
 
     sim.ct.SetProtocol();
 
-    sim.ct.AskEngineSpeed();
+    float speed = sim.ct.AskEngineSpeed();
+    char* ch = (char*) malloc(9 + 327);
+    sprintf(ch, "speed: %f\r\n", speed);
+    uart_write_bytes(UART_OBD_PORT_NUM, ch, 9 + sizeof(speed));
+
+    sim.ct.AskPids1();
+    
+    uart_write_bytes(UART_OBD_PORT_NUM, "active pids: ", 13);
+    uart_write_bytes(UART_OBD_PORT_NUM, sim.ct.getActivePids(), 4);
 
     // sim.ct.AskVehicleSpeed();
 
     // sim.ct.AskRuntime();
-
+    free(ch);
     vTaskDelay(10000 / portTICK_PERIOD_MS);
 }
 

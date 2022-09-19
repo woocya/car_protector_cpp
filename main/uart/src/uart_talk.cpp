@@ -35,18 +35,3 @@ int UartTalk::UartConversation(const char *command, int wait_for) {
     }
     return len;
 }
-
-
-int UartTalk::TalkAndCheck(const char *command, int wait_for, const char* response = NULL) {
-    int len = UartConversation(command, wait_for); //no idea???
-    // if (response != NULL) {
-    //     for (int i = 0; i < strlen(response); i++) {
-    //         if (response[i] != buffer[i]) {
-    //             return false;
-    //         }
-    //     }
-    // }
-    
-    return len;
-}
-//what to do if len == -1?

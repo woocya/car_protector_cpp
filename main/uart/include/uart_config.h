@@ -23,7 +23,6 @@
 
 #define UART_BUF_SIZE (1024)
 
-
 void uart_config();
 
 #endif // UART_CONFIG_H_

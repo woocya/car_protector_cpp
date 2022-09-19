@@ -7,6 +7,7 @@
 #include "gps_data_parsing.h"
 #include "uart_config.h"
 #include "car_talking.h"
+#include "motion_sensor.h"
 #include "database_talking.h"
 #include "example_wifi.h"
 #include "values.h"
@@ -32,6 +33,8 @@ static void cos(void *arg) {
     DatabaseTalking dt(UART_SIM_PORT_NUM);
     dt.ActivateGPRS();
 
+    GPSParsing gps(UART_SIM_PORT_NUM);
+
     EventBits_t bits;
 
     Values values;
@@ -46,21 +49,67 @@ static void cos(void *arg) {
                 portMAX_DELAY);
 
         if (bits & WIFI_CONNECTED_BIT) {
-            limits_buffer = http_rest_with_url();
+            limits_buffer = http_rest_with_url(0, nullptr);
         }
         else if (bits & WIFI_FAIL_BIT) {
             limits_buffer = dt.GetDataFromDatabase();
         }
+
+        values.parse(limits_buffer);
         
         if (sim.ct.GetObdStarted() != true) {
             esp_restart();
         }
+
+        sim.ct.CheckAvailableParams();
         
-        values.setActive(sim.ct.AskEngineSpeed());
+        unsigned char* pids;
+        pids = sim.ct.getActivePids();
+        for (int num_of_param = 0; num_of_param < 4; num_of_param++) {
+            if (pids[num_of_param] & 1) {
+                switch(num_of_param) {
+                    case 0:
+                        values.setActive(sim.ct.AskEngineSpeed());
+                        break;
+                    case 1:
+                        values.setCarSpeed(sim.ct.AskVehicleSpeed());
+                        break;
+                    case 2:
+                        values.setFuelLevel(sim.ct.AskFuelLevel());
+                        break;
+                    case 3:
+                        values.setRuntime(sim.ct.AskRuntime());
+                        break;
+                    default:
+                        break;
+                }
+            } 
+        }
 
-        // sim.ct.AskVehicleSpeed();
+        values.setMotionSensor();
 
-        // sim.ct.AskRuntime();
+        gps.ActivateGps();
+        gps.GetData();
+        gps.ParseData();
+
+        values.setDate(gps.GetYear(), gps.GetMonth(), gps.GetDay());
+        values.setTime(gps.GetHour(), gps.GetMinute());
+        values.setLatitude(gps.GetLatitude());
+        values.setLongitude(gps.GetLongitude());
+
+        if (values.getRuntime() != -1) {
+            values.countTimeWithRuntime();
+        }
+
+        values.compareAndWarn(sim);
+        
+
+        if (bits & WIFI_CONNECTED_BIT) {
+            http_rest_with_url(1, values.constructPostMessage());
+        }
+        else if (bits & WIFI_FAIL_BIT) {
+            dt.SendDataToDatabase(values.constructPostMessage());
+        }
 
         vTaskDelay(10000 / portTICK_PERIOD_MS);
     }
