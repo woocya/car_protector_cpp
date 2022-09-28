@@ -21,7 +21,7 @@ public:
     CarTalking ct;
     Sim(int where): UartTalk(where), ct(where) {}
 
-    void SetTelephoneNumber(const char telephone_number[9]);
+    void SetTelephoneNumber(char telephone_number[9]);
     bool InitializeSIM();
     bool SendSMS(const char * what_to_send);
 };

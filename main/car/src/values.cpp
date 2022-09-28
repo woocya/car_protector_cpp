@@ -87,50 +87,80 @@ int Values::compareTime(Time a, Time b) {
 
 void Values::compareAndWarn(Sim &sim) {
     sim.SetTelephoneNumber(telephone_number);
-    if (is_active && (compareTime(time_from_GPS, limit_time_min) == 1 || compareTime(time_from_GPS, limit_time_min) == -1)) {
+    uart_write_bytes(UART_OBD_PORT_NUM, "number set\r\n", 12);
+    if (is_active && (compareTime(time_from_GPS, limit_time_min) == -1 || compareTime(time_from_GPS, limit_time_max) == 1)) {
+        
+        uart_write_bytes(UART_OBD_PORT_NUM, "time surpassed\r\n", 16);
         sim.SendSMS("Uwaga! Pojazd aktywny w niedozwolonym czasie!");
     }
 
     if (latitude < limit_latitude_min || latitude > limit_latitude_max || longitude < limit_longitude_min || longitude > limit_longitude_max) {
-        char * message;
-        sprintf(message, "Uwaga! Pojazd przekroczył dopuszczalną strefę! Współrzędne to %.6lf %.6lf", latitude, longitude);
+        
+        uart_write_bytes(UART_OBD_PORT_NUM, "location surpassed\r\n", 20);
+        char * message = (char*)malloc(313);
+        sprintf(message, "Uwaga! Pojazd przekroczyl dopuszczalna strefe! Wspolrzedne to %.6lf %.6lf", latitude, longitude);
         sim.SendSMS(message);
+        free(message);
     }
 
     if (motion_sensor && !limit_motion_sensor) {
-        sim.SendSMS("Uwaga! Wykryto ruch przy pojeździe!");
+        
+        uart_write_bytes(UART_OBD_PORT_NUM, "motion surpassed\r\n", 18);
+        sim.SendSMS("Uwaga! Wykryto ruch przy pojezdzie!");
     }
+    sim.SendSMS("Wszystko w porzadku.");
 }
 
 void Values::parse(const char* buffer) {
+    uart_write_bytes(UART_OBD_PORT_NUM, "buffer =   ", 11);
+    uart_write_bytes(UART_OBD_PORT_NUM, buffer, 135);
+    uart_write_bytes(UART_OBD_PORT_NUM, "end of buffer\r\n\r\n", 17);
     int i = 0;
     int x = 0;
     int values_detected = 0;
 
     std::string helper_string;
     std::string::size_type sz;
+    char* ch;
 
     while (buffer[i] != 0) {
         if (buffer[i] == '=') {
+            i++;
             switch (values_detected) {
                 case 0:
+                    uart_write_bytes(UART_OBD_PORT_NUM, "case 0\r\n", 8);
+                    vTaskDelay(200 / portTICK_PERIOD_MS);
                     limit_time_min.hour = buffer[i] - '0';
                     limit_time_min.hour = limit_time_min.hour * 10 + (buffer[i+1] - '0');
                     limit_time_min.minute = buffer[i+3] - '0';
                     limit_time_min.minute = limit_time_min.minute * 10 + (buffer[i+4] - '0');
                     values_detected++;
                     i+=5;
+                    ch = (char*)malloc(2*sizeof(int) + 18);
+                    sprintf(ch, "hour: %d, min: %d\r\n", limit_time_min.hour, limit_time_min.minute);
+                    uart_write_bytes(UART_OBD_PORT_NUM, ch, 50);
+                    free(ch);
+                    vTaskDelay(200 / portTICK_PERIOD_MS);
                     break;
                 case 1:
+                    uart_write_bytes(UART_OBD_PORT_NUM, "case 1\r\n", 8);
+                    vTaskDelay(200 / portTICK_PERIOD_MS);
                     limit_time_max.hour = buffer[i] - '0';
                     limit_time_max.hour = limit_time_max.hour * 10 + (buffer[i+1] - '0');
                     limit_time_max.minute = buffer[i+3] - '0';
                     limit_time_max.minute = limit_time_max.minute * 10 + (buffer[i+4] - '0');
                     values_detected++;
                     i+=5;
+                    ch = (char*)malloc(2*sizeof(int) + 18);
+                    sprintf(ch, "hour: %d, min: %d\r\n", limit_time_max.hour, limit_time_max.minute);
+                    uart_write_bytes(UART_OBD_PORT_NUM, ch, 50);
+                    vTaskDelay(200 / portTICK_PERIOD_MS);
+                    free(ch);
                     break;
                 case 2:
-                    x = 0;
+                    uart_write_bytes(UART_OBD_PORT_NUM, "case 2\r\n", 8);
+                    vTaskDelay(200 / portTICK_PERIOD_MS);
+                    x = i;
                     helper_string = buffer[x];
                     x++;
                     while(buffer[x] != ',') {
@@ -139,7 +169,7 @@ void Values::parse(const char* buffer) {
                     }
                     limit_latitude_min = std::stof(helper_string, &sz);
 
-                    x+=2;
+                    x++;
                     helper_string = buffer[x];
                     x++;
                     while(buffer[x] != ' ') {
@@ -149,10 +179,19 @@ void Values::parse(const char* buffer) {
                     limit_longitude_min = std::stof(helper_string, &sz);
                     
                     values_detected++;
-                    i+=x;
+                    i+=(x-i);
+
+                    ch = (char*)malloc(657);
+                    sprintf(ch, "min lat: %f, min lon: %f\r\n", limit_latitude_min, limit_longitude_min);
+                    uart_write_bytes(UART_OBD_PORT_NUM, ch, 50);
+                    free(ch);
+                    vTaskDelay(200 / portTICK_PERIOD_MS);
+                    
                     break;
                 case 3:
-                    x = 0;
+                    uart_write_bytes(UART_OBD_PORT_NUM, "case 3\r\n", 8);
+                    vTaskDelay(200 / portTICK_PERIOD_MS);
+                    x = i;
                     helper_string = buffer[x];
                     x++;
                     while(buffer[x] != ',') {
@@ -161,7 +200,7 @@ void Values::parse(const char* buffer) {
                     }
                     limit_latitude_max = std::stof(helper_string, &sz);
 
-                    x+=2;
+                    x++;
                     helper_string = buffer[x];
                     x++;
                     while(buffer[x] != ' ') {
@@ -171,19 +210,45 @@ void Values::parse(const char* buffer) {
                     limit_longitude_max = std::stof(helper_string, &sz);
 
                     values_detected++;
-                    i+=x;
+                    i+=(x-i);
+
+                    ch = (char*)malloc(657);
+                    sprintf(ch, "min lat: %f, min lon: %f\r\n", limit_latitude_max, limit_longitude_max);
+                    uart_write_bytes(UART_OBD_PORT_NUM, ch, 50);
+                    free(ch);
+                    vTaskDelay(200 / portTICK_PERIOD_MS);
+
                     break;
                 case 4:
+                    uart_write_bytes(UART_OBD_PORT_NUM, "case 4\r\n", 8);
+                    vTaskDelay(200 / portTICK_PERIOD_MS);
                     limit_motion_sensor = buffer[i];
+                    values_detected++;
                     i++;
+
+                    ch = (char*)malloc(sizeof(int) + 15);
+                    sprintf(ch, "motion: %d\r\n", limit_motion_sensor);
+                    uart_write_bytes(UART_OBD_PORT_NUM, ch, 50);
+                    free(ch);
+                    vTaskDelay(200 / portTICK_PERIOD_MS);
+
                     break;
                 case 5:
+                    uart_write_bytes(UART_OBD_PORT_NUM, "case 5\r\n", 8);
+                    vTaskDelay(200 / portTICK_PERIOD_MS);
                     for(x = 0; x < 9; x++) {
                         telephone_number[x] = buffer[i+x];
                     }
 
                     values_detected++;
                     i+=9;
+
+                    ch = (char*)malloc(18);
+                    sprintf(ch, "tel: %s\r\n", telephone_number);
+                    uart_write_bytes(UART_OBD_PORT_NUM, ch, 18);
+                    free(ch);
+                    vTaskDelay(200 / portTICK_PERIOD_MS);
+
                     break;
                 default:
                     break;
@@ -196,8 +261,24 @@ void Values::parse(const char* buffer) {
 
 }
 
-const char * Values::constructPostMessage() {
-    std::stringstream message;
-    message << "id=1,latitude=" << latitude << ",longitude=" << longitude << ",isActive=" << is_active << ",vehicleSpeed=" << car_speed << ",fuelLevel=" << fuel_level << ",isMotion=" << motion_sensor;
-    return message.str().c_str();
+char * Values::constructPostMessage() {
+    char * message = (char*)malloc(1190);
+    sprintf(message, "AT+HTTPPARA=URL,\"http://car-protector.herokuapp.com/postData?id=1&latitude=%.6lf&longitude=%.6lf&isActive=%d&dateOfLastStart=%02d-%02d-%d&timeOfLastStart=%d:%d&vehicleSpeed=%d&fuelLevel=%.1f&isMotion=%d\"\r", latitude, longitude, is_active, date_of_car_start.year, date_of_car_start.month, date_of_car_start.day, time_of_car_start.hour, time_of_car_start.minute, car_speed, fuel_level, motion_sensor);
+
+    return message;
+}
+
+void Values::setTimeOfCar(int hour, int minute) {
+    time_of_car_start.hour = hour;
+    time_of_car_start.minute = minute;
+}
+
+void Values::setDateOfCar(int year, int month, int day) {
+    date_of_car_start.year = year;
+    date_of_car_start.month = month;
+    date_of_car_start.day = day;
+}
+
+void Values::setMotionSensor(bool is_motion) {
+    this->motion_sensor = is_motion;
 }

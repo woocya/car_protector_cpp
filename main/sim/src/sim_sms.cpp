@@ -17,18 +17,19 @@ bool Sim::InitializeSIM() {
     return true;
 }
 
-void Sim::SetTelephoneNumber(const char* telephone_number) {
+void Sim::SetTelephoneNumber(char* telephone_number) {
     int i = 0;
-    while (i != 9) {
+    while (i < 9) {
         this->telephone_number[i] = telephone_number[i];
+        i++;
     }
 }
 
 bool Sim::SendSMS(const char * what_to_send) {
     Sim::UartConversation("AT+CSCA=\"+48501200777\"\r", 500);
     Sim::UartConversation("AT+CMGF=1\r", 500);
-    char * ch = (char*)malloc(20);
-    sprintf(ch, "AT+CMGS=\"%s\"\r", telephone_number);
+    char * ch = (char*)malloc(21);
+    sprintf(ch, "AT+CMGS=\"%c%c%c%c%c%c%c%c%c\"\r", telephone_number[0], telephone_number[1], telephone_number[2], telephone_number[3], telephone_number[4], telephone_number[5], telephone_number[6], telephone_number[7], telephone_number[8]);
     Sim::UartConversation(ch, 500);
 
     uint8_t ctrlz = 0x1A;

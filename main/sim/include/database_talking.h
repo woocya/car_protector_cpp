@@ -17,7 +17,7 @@ public:
 
     char * GetDataFromDatabase();
 
-    int SendDataToDatabase(const char * message);//double lat, double lon
+    void SendDataToDatabase(const char * url);//double lat, double lon
 };
 
 #endif // DATABASE_TALKING_H_

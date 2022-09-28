@@ -29,13 +29,12 @@ char * DatabaseTalking::GetDataFromDatabase() {
     return response;
 }
 
-int DatabaseTalking::SendDataToDatabase(const char * message) {
+void DatabaseTalking::SendDataToDatabase(const char * url) {
     DatabaseTalking::UartConversation("AT+SAPBR=1,1\r", 500);
     DatabaseTalking::UartConversation("AT+HTTPINIT\r", 500);
     DatabaseTalking::UartConversation("AT+HTTPPARA=CID,1\r", 500);
-    DatabaseTalking::UartConversation("AT+HTTPPARA=URL,\"http://car-protector.herokuapp.com/postData\"\r", 500);
-    DatabaseTalking::UartConversation("AT+HTTPDATA=192,5000\r", 1000);
-    DatabaseTalking::UartConversation(message, 5000);
+    DatabaseTalking::UartConversation(url, 5000);
+    DatabaseTalking::UartConversation("AT+HTTPDATA=0,5000\r", 1000);
     DatabaseTalking::UartConversation("AT+HTTPACTION=1\r", 5000);
     DatabaseTalking::UartConversation("AT+HTTPREAD\r", 500);
     DatabaseTalking::UartConversation("AT+HTTPTERM\r", 500);

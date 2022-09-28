@@ -73,7 +73,14 @@ public:
 
     void parse(const char* buffer);
 
-    const char * constructPostMessage();
+    char * constructPostMessage();
+
+
+    void setTimeOfCar(int hour, int minute);
+
+    void setDateOfCar(int year, int month, int day);
+
+    void setMotionSensor(bool is_motion);
 };
 
 #endif VALUES_H_

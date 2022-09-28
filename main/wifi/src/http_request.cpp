@@ -110,9 +110,10 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
     return ESP_OK;
 }
 
-char * http_rest_with_url(bool request, const char* thing_to_post)
+char * http_rest_with_url(bool request, const char* url)
 {
     char local_response_buffer[MAX_HTTP_OUTPUT_BUFFER] = {0};
+    char* ch = local_response_buffer;
     /**
      * NOTE: All the configuration parameters for http_client must be spefied either in URL or as host and path parameters.
      * If host and path parameters are not set, query parameter will be ignored. In such cases,
@@ -121,20 +122,22 @@ char * http_rest_with_url(bool request, const char* thing_to_post)
      * If URL as well as host and path parameters are specified, values of host and path will be considered.
      */
     esp_http_client_config_t config = {
-        .host = "car-protector.herokuapp.com",
-        .path = "/getLimits",
+        .url = url,
+       // .path = "",
         .query = "esp",
-        .disable_auto_redirect = true,
+        .disable_auto_redirect = false,
         .event_handler = _http_event_handler,
         .user_data = local_response_buffer        // Pass address of local buffer to get response
     };
     esp_http_client_handle_t client = esp_http_client_init(&config);
+    uart_write_bytes(UART_OBD_PORT_NUM, "set wifi config\r\n", 17);
+    vTaskDelay(5000 / portTICK_PERIOD_MS);
 
     if (!request) {
         // GET
         esp_err_t err = esp_http_client_perform(client);
         if (err == ESP_OK) {
-            uart_write_bytes(UART_OBD_PORT_NUM, "it ok\r\n", 7);
+            uart_write_bytes(UART_OBD_PORT_NUM, "get ok\r\n", 8);
             vTaskDelay(500 / portTICK_PERIOD_MS);
             ESP_LOGI(TAG, "HTTP GET Status = %d, content_length = %d",
                     esp_http_client_get_status_code(client),
@@ -144,34 +147,47 @@ char * http_rest_with_url(bool request, const char* thing_to_post)
             vTaskDelay(500 / portTICK_PERIOD_MS);
             ESP_LOGE(TAG, "HTTP GET request failed: %s", esp_err_to_name(err));
         }
-        uart_write_bytes(UART_OBD_PORT_NUM, "response:\r\n", 11);
+        //uart_write_bytes(UART_OBD_PORT_NUM, "response:\r\n", 11);
         vTaskDelay(500 / portTICK_PERIOD_MS);
     } 
     else {
         // POST
-        const char *post_data = thing_to_post;
-        esp_http_client_set_url(client, "http://car-protector.herokuapp.com/postData");
+        uart_write_bytes(UART_OBD_PORT_NUM, "inside post\r\n", 13);
+        //const char *post_data = "?id=1&latitude=20.999999&longitude=20.999999&isActive=1&dateOfLastStart=2022-09-25&timeOfLastStart=20:20&vehicleSpeed=40&fuelLevel=40.5&isMotion=0";
+        //esp_http_client_set_url(client, "http://car-protector.herokuapp.com/postData");
+        uart_write_bytes(UART_OBD_PORT_NUM, "set url\r\n", 9);
+        vTaskDelay(200 / portTICK_PERIOD_MS);
         esp_http_client_set_method(client, HTTP_METHOD_POST);
-        esp_http_client_set_header(client, "Content-Type", "text");
-        esp_http_client_set_post_field(client, post_data, strlen(post_data));
+        uart_write_bytes(UART_OBD_PORT_NUM, "set method\r\n", 12);
+        vTaskDelay(200 / portTICK_PERIOD_MS);
+        // esp_http_client_set_header(client, "Content-Type", "application/x-www-form-urlencoded");
+        // uart_write_bytes(UART_OBD_PORT_NUM, "set content\r\n", 13);
+        // vTaskDelay(200 / portTICK_PERIOD_MS);
+        // esp_http_client_set_post_field(client, post_data, strlen(post_data));
+        uart_write_bytes(UART_OBD_PORT_NUM, "set field\r\n", 11);
+        vTaskDelay(200 / portTICK_PERIOD_MS);
         esp_err_t err = esp_http_client_perform(client);
+        uart_write_bytes(UART_OBD_PORT_NUM, "performed\r\n", 11);
+        vTaskDelay(200 / portTICK_PERIOD_MS);
         if (err == ESP_OK) {
+            uart_write_bytes(UART_OBD_PORT_NUM, "post ok\r\n", 9);
             ESP_LOGI(TAG, "HTTP POST Status = %d, content_length = %d",
                     esp_http_client_get_status_code(client),
                     esp_http_client_get_content_length(client));
         } else {
+            uart_write_bytes(UART_OBD_PORT_NUM, "HTTP POST request failed\r\n", 26);
             ESP_LOGE(TAG, "HTTP POST request failed: %s", esp_err_to_name(err));
         }
     }
     
     int i=0;
-    while(local_response_buffer[i] != 0) {        
-        uart_write_bytes(UART_OBD_PORT_NUM, &local_response_buffer[i], 1);
-        ++i;
-    }
+    // while(local_response_buffer[i] != 0) {        
+    //     uart_write_bytes(UART_OBD_PORT_NUM, &local_response_buffer[i], 1);
+    //     ++i;
+    // }
     vTaskDelay(500 / portTICK_PERIOD_MS);
     //ESP_LOG_BUFFER_HEX(TAG, local_response_buffer, strlen(local_response_buffer));
 
     esp_http_client_cleanup(client);
-    return local_response_buffer;
+    return ch;
 }

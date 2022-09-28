@@ -108,7 +108,7 @@ static void cos(void *arg) {
             http_rest_with_url(1, values.constructPostMessage());
         }
         else if (bits & WIFI_FAIL_BIT) {
-            dt.SendDataToDatabase(values.constructPostMessage());
+            //dt.SendDataToDatabase(values.constructPostMessage());
         }
 
         vTaskDelay(10000 / portTICK_PERIOD_MS);
