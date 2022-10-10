@@ -20,29 +20,18 @@ static void cos(void *arg) {
     uart_config();
     vTaskDelay(5000 / portTICK_PERIOD_MS);
     uart_write_bytes(UART_OBD_PORT_NUM, "before\r\n", 8);
-    
-    // wifi_init_sta();
-    // http_rest_with_url();
-
-    // while (true)
-    // {
-    //     vTaskDelay(pdMS_TO_TICKS(1000));
-    //     App.run();
-    //     uart_write_bytes(UART_OBD_PORT_NUM, "Another attempt...\r\n", 20);
-    //     if (App.Wifi.GetState() == WIFI::Wifi::state_e::CONNECTED) {
-    //         uart_write_bytes(UART_OBD_PORT_NUM, "Going to do http request...\r\n", 29);
-    //         http_rest_with_url();
-    //         vTaskDelay(5000 / portTICK_PERIOD_MS);
-    //     }
-        
-    // }
 
     Sim sim(UART_SIM_PORT_NUM);
-    //CarTalking ct(UART_SIM_PORT_NUM);
     sim.InitializeSIM();
+
+
     DatabaseTalking dt(UART_SIM_PORT_NUM);
     dt.ActivateGPRS();
+
+    GPSParsing gps(UART_SIM_PORT_NUM);
+
     Values values;
+    unable_to_connect = 0;
     
     uart_write_bytes(UART_OBD_PORT_NUM, "stuff initialized\r\n", 19);
 
@@ -58,31 +47,83 @@ static void cos(void *arg) {
     
     uart_write_bytes(UART_OBD_PORT_NUM, "wifi figured out\r\n", 18);
 
-    // if (bits & WIFI_CONNECTED_BIT) {
-    //     uart_write_bytes(UART_OBD_PORT_NUM, "wifi\r\n", 6);
-    //     limits_buffer = http_rest_with_url(0, "http://car-protector.herokuapp.com/getLimits");
-    // }
-    // else if (bits & WIFI_FAIL_BIT) {
-    //     uart_write_bytes(UART_OBD_PORT_NUM, "gprs\r\n", 6);
-    //     limits_buffer = dt.GetDataFromDatabase();
-    // }
-    // else {
-    //     uart_write_bytes(UART_OBD_PORT_NUM, "nothing?\r\n", 10);
-    // }
+    if (bits & WIFI_CONNECTED_BIT) {
+        uart_write_bytes(UART_OBD_PORT_NUM, "wifi\r\n", 6);
+        limits_buffer = http_rest_with_url(0, "http://car-protector.herokuapp.com/getLimits");
+    }
+    else if (bits & WIFI_FAIL_BIT) {
+         uart_write_bytes(UART_OBD_PORT_NUM, "gprs\r\n", 6);
+         limits_buffer = dt.GetDataFromDatabase();
+    }
 
-    // values.parse(limits_buffer);
+    values.parse(limits_buffer);
+    free(limits_buffer);
     uart_write_bytes(UART_OBD_PORT_NUM, "parsed\r\n", 8);
+    
 
-    values.setTime(12, 12);
-    values.setDate(2022, 9, 20);
-    values.setActive(true);    
-    values.setCarSpeed(50);
-    values.setFuelLevel(50.0);
-    values.setLatitude(-45.000000);
-    values.setLongitude(-45.000000);
-    values.setMotionSensor(false);
-    values.setDateOfCar(2022, 9, 19);
-    values.setTimeOfCar(23, 23);
+    sim.ct.configureBluetooth();
+    if (sim.ct.GetObdStarted()) {
+        sim.ct.SetProtocol();
+
+        // sim.ct.CheckAvailableParams();
+        
+        // unsigned char* pids;
+        // pids = sim.ct.getActivePids();
+        // for (int num_of_param = 0; num_of_param < 4; num_of_param++) {
+        //     if (pids[num_of_param] & 1) {
+        //         switch(num_of_param) {
+        //             case 0:
+                           values.setActive(sim.ct.AskEngineSpeed());
+        //                 sim.ct.AskEngineSpeed();
+                           uart_write_bytes(UART_OBD_PORT_NUM, "ENGINE\r\n", 8);
+        //                 break;
+        //             case 1:
+                           values.setCarSpeed(sim.ct.AskVehicleSpeed());
+        //                 sim.ct.AskVehicleSpeed();
+                           uart_write_bytes(UART_OBD_PORT_NUM, "VEHICLE\r\n", 9);
+        //                 break;
+        //             case 2:
+                           values.setFuelLevel(sim.ct.AskFuelLevel());
+        //                 sim.ct.AskFuelLevel();
+                           uart_write_bytes(UART_OBD_PORT_NUM, "FUEL\r\n", 6);
+        //                 break;
+        //             case 3:
+        //                   values.setRuntime(sim.ct.AskRuntime());
+        //                 sim.ct.AskRuntime();
+        //                   uart_write_bytes(UART_OBD_PORT_NUM, "RUNTIME\r\n", 9);
+        //                 break;
+        //             default:
+        //                 break;
+        //         }
+        //     } 
+      //  }
+    }
+
+    uart_write_bytes(UART_OBD_PORT_NUM, "gps start\r\n", 11);
+    gps.ActivateGps();
+
+    while (gps.GetFixStatus() != 1) {
+        gps.GetData();
+        gps.ParseData();
+    }
+    uart_write_bytes(UART_OBD_PORT_NUM, "got gps data\r\n", 14);
+
+    values.setRuntime(sim.ct.AskRuntime());
+    uart_write_bytes(UART_OBD_PORT_NUM, "RUNTIME\r\n", 9);
+    
+
+    values.setDate(gps.GetYear(), gps.GetMonth(), gps.GetDay());
+    values.setTime(gps.GetHour(), gps.GetMinute());
+    values.setLatitude(gps.GetLatitude());
+    values.setLongitude(gps.GetLongitude());
+    // // values.setActive(true);    
+    // // values.setCarSpeed(50);
+    // // values.setFuelLevel(50.0);
+    // values.setLatitude(gps.GetLatitude());
+    // values.setLongitude(gps.GetLongitude());
+     values.setMotionSensor(false);
+     values.setDateOfCar(2022, 9, 19);
+     values.setTimeOfCar(23, 23);
 
     uart_write_bytes(UART_OBD_PORT_NUM, "values set\r\n", 12);
 
@@ -96,7 +137,7 @@ static void cos(void *arg) {
         http_rest_with_url(1, values.constructPostMessage());
     }
     else if (bits & WIFI_FAIL_BIT) {
-        uart_write_bytes(UART_OBD_PORT_NUM, "gprs\r\n", 6);
+         uart_write_bytes(UART_OBD_PORT_NUM, "gprs\r\n", 6);
         dt.SendDataToDatabase(values.constructPostMessage());
     }
     else {
@@ -123,9 +164,9 @@ static void cos(void *arg) {
 
     // sim.ct.SetProtocol();
 
-    // float speed = sim.ct.AskEngineSpeed();
+    // float speed = sim.ct.AskFuelLevel();
     // char* ch = (char*) malloc(9 + 327);
-    // sprintf(ch, "speed: %f\r\n", speed);
+    // sprintf(ch, "level: %f\r\n", speed);
     // uart_write_bytes(UART_OBD_PORT_NUM, ch, 9 + sizeof(speed));
 
     // sim.ct.AskPids1();

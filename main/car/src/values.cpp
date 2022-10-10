@@ -87,7 +87,6 @@ int Values::compareTime(Time a, Time b) {
 
 void Values::compareAndWarn(Sim &sim) {
     sim.SetTelephoneNumber(telephone_number);
-    uart_write_bytes(UART_OBD_PORT_NUM, "number set\r\n", 12);
     if (is_active && (compareTime(time_from_GPS, limit_time_min) == -1 || compareTime(time_from_GPS, limit_time_max) == 1)) {
         
         uart_write_bytes(UART_OBD_PORT_NUM, "time surpassed\r\n", 16);
@@ -112,9 +111,6 @@ void Values::compareAndWarn(Sim &sim) {
 }
 
 void Values::parse(const char* buffer) {
-    uart_write_bytes(UART_OBD_PORT_NUM, "buffer =   ", 11);
-    uart_write_bytes(UART_OBD_PORT_NUM, buffer, 135);
-    uart_write_bytes(UART_OBD_PORT_NUM, "end of buffer\r\n\r\n", 17);
     int i = 0;
     int x = 0;
     int values_detected = 0;

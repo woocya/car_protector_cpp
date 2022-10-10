@@ -8,6 +8,9 @@
 
 #include "uart_config.h"
 
+
+extern bool unable_to_connect = 0;
+
 class UartTalk {
 protected:    
     int where;

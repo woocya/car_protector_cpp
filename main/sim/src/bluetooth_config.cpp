@@ -4,7 +4,7 @@ BluetoothConfig::BluetoothConfig(int where): UartTalk(where) {}
 
 int BluetoothConfig::Configure() {
     UartConversation("AT+BTPOWER=1\r\n", 1000); //UART_SIM_PORT_NUM
-    UartConversation("AT+BTUNPAIR=0\r\n", 3000);
+    UartConversation("AT+BTUNPAIR=1\r\n", 3000);
     int scan_length = UartConversation("AT+BTSCAN=1,10\r\n", 10000);
 
     int num_of_device = ParseScanning(scan_length);

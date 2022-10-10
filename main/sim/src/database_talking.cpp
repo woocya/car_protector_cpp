@@ -14,11 +14,13 @@ char * DatabaseTalking::GetDataFromDatabase() {
     DatabaseTalking::UartConversation("AT+HTTPINIT\r", 500);
     DatabaseTalking::UartConversation("AT+HTTPPARA=CID,1\r", 500);
     DatabaseTalking::UartConversation("AT+HTTPPARA=URL,\"http://car-protector.herokuapp.com/getLimits\"\r", 500);
-    DatabaseTalking::UartConversation("AT+HTTPDATA=192,5000\r", 1000);
+    DatabaseTalking::UartConversation("AT+HTTPDATA=192,5000\r", 3000);
+    vTaskDelay(3000 / portTICK_PERIOD_MS);
     DatabaseTalking::UartConversation("AT+HTTPACTION=0\r", 5000);
+    vTaskDelay(3000 / portTICK_PERIOD_MS);
     int len = DatabaseTalking::UartConversation("AT+HTTPREAD\r", 3000);
 
-    char response[len];
+    char* response = (char*)malloc(len);
     for (int i = 0; i < len; i++) {
         response[i] = buffer[i];
     }

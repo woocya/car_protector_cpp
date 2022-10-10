@@ -65,29 +65,32 @@ unsigned char* CarTalking::getActivePids() {
 }
 
 float CarTalking::AskEngineSpeed() {
-    char buffer_to_read[20];
+    char buffer_to_read[9];
     std::string helper_string;
     std::stringstream ss;
     int first_number;
     int second_number;
 
-    ReadAndProcessMessage("010C\r", 5, buffer_to_read, 20, 10000, true);
+    ReadAndProcessMessage("010C\r", 5, buffer_to_read, 9, 10000, true);
 
-    helper_string = buffer_to_read[4];
-    helper_string += buffer_to_read[5];
+    if (!unable_to_connect) {
+        helper_string = buffer_to_read[4];
+        helper_string += buffer_to_read[5];
 
-    ss << std::hex << helper_string;
-    ss >> first_number;
+        ss << std::hex << helper_string;
+        ss >> first_number;
 
-    std::stringstream().swap(ss);
+        std::stringstream().swap(ss);
 
-    helper_string = buffer_to_read[7];
-    helper_string += buffer_to_read[8];
+        helper_string = buffer_to_read[7];
+        helper_string += buffer_to_read[8];
 
-    ss << std::hex << helper_string;
-    ss >> second_number;
+        ss << std::hex << helper_string;
+        ss >> second_number;
 
-    return (float(first_number) * 256 + float(second_number)) / 4;
+        return (float(first_number) * 256 + float(second_number)) / 4;
+    }
+    return -1.0;
 }
 
 int CarTalking::AskVehicleSpeed() {
@@ -96,15 +99,18 @@ int CarTalking::AskVehicleSpeed() {
     std::stringstream ss;
     int number;
 
-    ReadAndProcessMessage("010D\r", 5, buffer_to_read, 5, 8000);
+    ReadAndProcessMessage("010D\r", 5, buffer_to_read, 6, 8000, true);
 
-    helper_string = buffer_to_read[4];
-    helper_string += buffer_to_read[5];
+    if (!unable_to_connect) {
+        helper_string = buffer_to_read[4];
+        helper_string += buffer_to_read[5];
 
-    ss << std::hex << helper_string;
-    ss >> number;
+        ss << std::hex << helper_string;
+        ss >> number;
 
-    return number;
+        return number;
+    }
+    return -1;
 }
 
 int CarTalking::AskRuntime() {
@@ -114,23 +120,26 @@ int CarTalking::AskRuntime() {
     int first_number;
     int second_number;
 
-    ReadAndProcessMessage("011F\r", 5, buffer_to_read, 6, 8000);
+    ReadAndProcessMessage("011F\r", 5, buffer_to_read, 9, 8000, true);
 
-    helper_string = buffer_to_read[4];
-    helper_string += buffer_to_read[5];
+    if (!unable_to_connect) {
+        helper_string = buffer_to_read[4];
+        helper_string += buffer_to_read[5];
 
-    ss << std::hex << helper_string;
-    ss >> first_number;
+        ss << std::hex << helper_string;
+        ss >> first_number;
 
-    std::stringstream().swap(ss);
+        std::stringstream().swap(ss);
 
-    helper_string = buffer_to_read[7];
-    helper_string += buffer_to_read[8];
+        helper_string = buffer_to_read[7];
+        helper_string += buffer_to_read[8];
 
-    ss << std::hex << helper_string;
-    ss >> second_number;
+        ss << std::hex << helper_string;
+        ss >> second_number;
 
-    return (int)first_number * 256 + (int)second_number;
+        return (int)first_number * 256 + (int)second_number;
+    }
+    return -1;
 }
 
 float CarTalking::AskFuelLevel() {
@@ -139,27 +148,66 @@ float CarTalking::AskFuelLevel() {
     std::stringstream ss;
     int number;
 
-    ReadAndProcessMessage("012F\r", 5, buffer_to_read, 5, 8000);
+    ReadAndProcessMessage("012F\r", 5, buffer_to_read, 6, 8000, true);
 
-    helper_string = buffer_to_read[4];
-    helper_string += buffer_to_read[5];
+    if (!unable_to_connect) {
+        helper_string = buffer_to_read[4];
+        helper_string += buffer_to_read[5];
 
-    ss << std::hex << helper_string;
-    ss >> number;
+        ss << std::hex << helper_string;
+        ss >> number;
 
-    return ((float)number * 100) / 255;
+        return ((float)number * 100) / 255;
+    }
+    return -1.0;
 }
 
 
 void CarTalking::CheckPidsSupported(uint8_t* command_set, int size) {
-    char buffer_to_read[7];
+    char buffer_to_read[15];
+    std::string helper_string;
+    std::stringstream ss;
+    char actual_bits[4];
+
     std::vector<std::string> pids{"0100\r", "0120\r"};
 
     for(int i = 0; i < 2; i++) {
-        ReadAndProcessMessage(pids[i].c_str(), 5, buffer_to_read, 7, 10000, true);
+        ReadAndProcessMessage(pids[i].c_str(), 5, buffer_to_read, 12, 10000, true);
+
+        helper_string = buffer_to_read[4];
+        helper_string += buffer_to_read[5];
+
+        ss << std::hex << helper_string;
+        ss >> actual_bits[0];
+
+        std::stringstream().swap(ss);
+
+        helper_string = buffer_to_read[7];
+        helper_string += buffer_to_read[8];
+
+        ss << std::hex << helper_string;
+        ss >> actual_bits[1];
+
+        std::stringstream().swap(ss);
+
+        helper_string = buffer_to_read[10];
+        helper_string += buffer_to_read[11];
+
+        ss << std::hex << helper_string;
+        ss >> actual_bits[2];
+
+        std::stringstream().swap(ss);
+
+        helper_string = buffer_to_read[13];
+        helper_string += buffer_to_read[14];
+
+        ss << std::hex << helper_string;
+        ss >> actual_bits[3];
+
+        std::stringstream().swap(ss);
 
             for (int j = 0; j < size; j++) {
-                if ((buffer_to_read[(command_set[i] / 8) + 4] >> (command_set[i] % 8)) & 1) {
+                if ((actual_bits[(command_set[j] / 8) + 4] >> (command_set[j] % 8)) & 1) {
                     if (size == 1) {
                         active_pids[3] |= checked_pids[3];
                         return;
@@ -180,6 +228,7 @@ void CarTalking::ReadAndProcessMessage(const char* command_to_send, int len_of_c
     pair = bt.SendCommand(command_to_send, len_of_command, wait_for);
     
     int i = 0;
+    std::string s;
     int num_of_chars = 0;
     int buffer_index = 0;
     int cnt = 0;
@@ -188,21 +237,26 @@ void CarTalking::ReadAndProcessMessage(const char* command_to_send, int len_of_c
         
         if (pair.second[i] == ':' && i + 6 < pair.first) { // "\r\n"
             if (isdigit(pair.second[i+4])) {
-                num_of_chars = pair.second[i+4] - '0';
+                s = pair.second[i+4];
+                num_of_chars = std::stoi(s);
 
                 for (cnt = i+6; cnt < i + 6 + num_of_chars && cnt < pair.first; cnt++) {
+                    if (pair.second[cnt] == 'U') {
+                        unable_to_connect = 1;
+                    }
                     if (skip_info) {
-                        if (pair.second[cnt] == '4' && pair.second[cnt+1] == '1') {
+                        if (pair.second[cnt] == '4') {
                             skip_info = false;
                             cnt+=2;
                         }
-                        else {
-                            break;
-                        }
                     }
-                    buffer_to_read[buffer_index] = pair.second[cnt];
-                    buffer_index++;
-                    uart_write_bytes(UART_OBD_PORT_NUM, &pair.second[cnt], 1);
+                    if (buffer_index < size_of_read_buffer && !skip_info) {
+                        buffer_to_read[buffer_index] = pair.second[cnt];
+                        buffer_index++;
+                        uart_write_bytes(UART_OBD_PORT_NUM, &pair.second[cnt], 1);
+                        vTaskDelay(100 / portTICK_PERIOD_MS);
+                    }
+                    
                 }
                 i = i + 6 + num_of_chars;
             }
@@ -210,6 +264,11 @@ void CarTalking::ReadAndProcessMessage(const char* command_to_send, int len_of_c
         else {
             i++;
         }
+        // char num = buffer_index + '0';
+        // uart_write_bytes(UART_OBD_PORT_NUM, "\r\n", 2);
+        // uart_write_bytes(UART_OBD_PORT_NUM, &num, 1);
+        // uart_write_bytes(UART_OBD_PORT_NUM, "\r\n", 2);
+        // vTaskDelay(100 / portTICK_PERIOD_MS);
     }
 }
 

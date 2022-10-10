@@ -9,6 +9,7 @@ void GPSParsing::ActivateGps() {
 
 void GPSParsing::GetData() {
     len = GPSParsing::UartConversation("AT+CGNSINF\r", 10000);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
 }
 
 void GPSParsing::ParseData() {
@@ -24,29 +25,53 @@ void GPSParsing::ParseData() {
     std::string speed;
     std::string::size_type sz;
 
-    if (isdigit(buffer[12])) {
-        gps_data["GNSS run status"] = float(buffer[12] - '0');
+    char ch;
+    uart_write_bytes(UART_OBD_PORT_NUM, "\r\n23 = ", 7);
+    ch = buffer[23];
+    uart_write_bytes(UART_OBD_PORT_NUM, &ch, 1);
+    uart_write_bytes(UART_OBD_PORT_NUM, "\r\n", 2);
+    vTaskDelay(50 / portTICK_PERIOD_MS);
+    uart_write_bytes(UART_OBD_PORT_NUM, "\r\n24 = ", 7);
+    ch = buffer[24];
+    uart_write_bytes(UART_OBD_PORT_NUM, &ch, 1);
+    uart_write_bytes(UART_OBD_PORT_NUM, "\r\n", 2);
+    vTaskDelay(50 / portTICK_PERIOD_MS);
+
+    if (isdigit(buffer[23])) {
+        gps_data["GNSS run status"] = float(buffer[23] - '0');
 
         int num_of_commas = 0;
         int add_to_i = 0;
-        int i = 13;
+        int i = 24;
         int x = 0;
-        char * ch;
+        //char ch;
 
         while (i < len-1 && num_of_commas < 7) {
             add_to_i = 0;
 
             if (buffer[i] == ',') {
+                uart_write_bytes(UART_OBD_PORT_NUM, "gps comma\r\n", 11);
+                ch = i;
+                vTaskDelay(50 / portTICK_PERIOD_MS);
+                uart_write_bytes(UART_OBD_PORT_NUM, &ch, 1);
                 num_of_commas++;
                 add_to_i = 1;
             }
             else {
                 switch (num_of_commas) {
                     case 1:
+                        uart_write_bytes(UART_OBD_PORT_NUM, "gps case 1\r\n", 12);
+                        ch = i;
+                        vTaskDelay(50 / portTICK_PERIOD_MS);
+                        uart_write_bytes(UART_OBD_PORT_NUM, &ch, 1);
                         gps_data["Fix status"] = buffer[i] - '0';
                         add_to_i = 1;
                         break;
                     case 2:
+                        uart_write_bytes(UART_OBD_PORT_NUM, "gps case 2\r\n", 12);
+                        vTaskDelay(50 / portTICK_PERIOD_MS);
+                        ch = i;
+                        uart_write_bytes(UART_OBD_PORT_NUM, &ch, 1);
                         year = buffer[i] - '0';
                         for (int x = i+1; x < i+4; x++) {
                             year = year * 10 + (buffer[x] - '0');
@@ -76,6 +101,10 @@ void GPSParsing::ParseData() {
                         add_to_i = 18;
                         break;
                     case 3:
+                        uart_write_bytes(UART_OBD_PORT_NUM, "gps case 3\r\n", 12);
+                        ch = i;
+                        vTaskDelay(50 / portTICK_PERIOD_MS);
+                        uart_write_bytes(UART_OBD_PORT_NUM, &ch, 1);
                         x = i;
                         latitude = buffer[x];
                         x++;
@@ -88,6 +117,10 @@ void GPSParsing::ParseData() {
 
                         break;
                     case 4:
+                        uart_write_bytes(UART_OBD_PORT_NUM, "gps case 4\r\n", 12);
+                        ch = i;
+                        vTaskDelay(50 / portTICK_PERIOD_MS);
+                        uart_write_bytes(UART_OBD_PORT_NUM, &ch, 1);
                         x = i;
                         longitude = buffer[x];
                         x++;
@@ -102,6 +135,10 @@ void GPSParsing::ParseData() {
 
                         break;
                     case 5:
+                        uart_write_bytes(UART_OBD_PORT_NUM, "gps case 5\r\n", 12);
+                        ch = i;
+                        vTaskDelay(50 / portTICK_PERIOD_MS);
+                        uart_write_bytes(UART_OBD_PORT_NUM, &ch, 1);
                         x = i;
                         altitude = buffer[x];
                         x++;
@@ -114,6 +151,10 @@ void GPSParsing::ParseData() {
 
                         break;
                     case 6:
+                        uart_write_bytes(UART_OBD_PORT_NUM, "gps case 6\r\n", 12);
+                        ch = i;
+                        vTaskDelay(50 / portTICK_PERIOD_MS);
+                        uart_write_bytes(UART_OBD_PORT_NUM, &ch, 1);
                         x = i;
                         speed = buffer[x];
                         x++;
@@ -131,7 +172,7 @@ void GPSParsing::ParseData() {
                         break;
                 }
             }
-            i += add_to_i;
+            i = i + add_to_i;
         }
     }    
 }

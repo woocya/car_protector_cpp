@@ -29,7 +29,7 @@ int UartTalk::UartConversation(const char *command, int wait_for) {
         uart_write_bytes(UART_OBD_PORT_NUM, "buffer is:", 10);
         vTaskDelay(100 / portTICK_PERIOD_MS);
         uart_write_bytes(UART_OBD_PORT_NUM, &arr, len);
-        vTaskDelay(100 / portTICK_PERIOD_MS);
+        vTaskDelay(200 / portTICK_PERIOD_MS);
         uart_write_bytes(UART_OBD_PORT_NUM, "end\n\r", 5);
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }
