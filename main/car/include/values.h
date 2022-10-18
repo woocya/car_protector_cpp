@@ -55,6 +55,8 @@ public:
 
     void setFuelLevel(float level);
 
+    float getFuelLevel();
+
     void setRuntime(int runtime);
 
     int getRuntime();

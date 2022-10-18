@@ -1,5 +1,7 @@
 #include "uart_talk.h"
 
+bool status = 0;
+
 UartTalk::UartTalk(int where) {
     buffer = new uint8_t[UART_BUF_SIZE];
     this->where = where;

@@ -187,7 +187,7 @@ char * http_rest_with_url(bool request, const char* url)
     // }
     vTaskDelay(500 / portTICK_PERIOD_MS);
     //ESP_LOG_BUFFER_HEX(TAG, local_response_buffer, strlen(local_response_buffer));
-
+    
     esp_http_client_cleanup(client);
     return ch;
 }

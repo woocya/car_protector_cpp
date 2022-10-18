@@ -9,7 +9,7 @@
 #include "uart_config.h"
 
 
-extern bool unable_to_connect = 0;
+extern bool status;
 
 class UartTalk {
 protected:    

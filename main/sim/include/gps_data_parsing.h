@@ -32,6 +32,8 @@ public:
     float GetAltitude();
     float GetSpeed();
 
+    void SetFixStatus(int status);
+
     int len;
 };
 
