@@ -1,10 +1,10 @@
 #ifndef BLUETOOTH_CONFIG_H_
 #define BLUETOOTH_CONFIG_H_
 
+#include "uart_talk.h"
+
 #include <iostream>
 #include <stdlib.h>
-
-#include "uart_talk.h"
 
 class BluetoothConfig: public UartTalk {
 private:

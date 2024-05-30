@@ -22,15 +22,11 @@ SOFTWARE. */
 
 #pragma once
 
-#include <cstring>
-//#include <algorithm> 
-#include <mutex>
-
 #include "esp_wifi.h"
 #include "esp_event.h"
 
-//#include "lwip/err.h" // Needed for NTP
-//#include "lwip/sys.h" // Needed for NTP
+#include <cstring>
+#include <mutex>
 
 namespace WIFI
 {

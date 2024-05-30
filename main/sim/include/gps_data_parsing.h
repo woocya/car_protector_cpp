@@ -1,15 +1,16 @@
 #ifndef GPS_DATA_PARSING_H_
 #define GPS_DATA_PARSING_H_
 
-#include <stdio.h>
-#include <cstring>
-#include <map>
+#include "uart_talk.h"
+
+#include "driver/gpio.h"
+#include "driver/uart.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "driver/uart.h"
-#include "driver/gpio.h"
 
-#include "uart_talk.h"
+#include <cstring>
+#include <map>
+#include <stdio.h>
 
 class GPSParsing: public UartTalk {
 private:

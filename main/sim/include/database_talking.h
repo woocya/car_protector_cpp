@@ -1,11 +1,11 @@
 #ifndef DATABASE_TALKING_H_
 #define DATABASE_TALKING_H_
 
+#include "uart_talk.h"
+
 #include <iostream>
 #include <sstream>
 #include <stdlib.h>
-
-#include "uart_talk.h"
 
 class DatabaseTalking: public UartTalk {
 private:

@@ -1,23 +1,23 @@
 // 1. atz (odpowiedz sugeruje ze polaczenie modulu jest ok)
 // 2. atsp2 lub atsp3 (ustawienie odpowiedniego protokolu)
-// 3. 
 #ifndef CAR_TALKING_H_
 #define CAR_TALKING_H_
 
-#include <vector>
+#include "bluetooth_config.h"
+#include "uart_talk.h"
+
+#include "driver/gpio.h"
+#include "driver/uart.h"
+#include "esp_log.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "sdkconfig.h"
+
+#include <cstring>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <cstring>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "driver/uart.h"
-#include "driver/gpio.h"
-#include "sdkconfig.h"
-#include "esp_log.h"
-
-#include "bluetooth_config.h"
-#include "uart_talk.h"
+#include <vector>
 
 class CarTalking: UartTalk {
 protected:

@@ -1,9 +1,10 @@
 #ifndef VALUES_H_
 #define VALUES_H_
 
-#include <stdio.h>
-#include "sim_sms.h"
 #include "motion_sensor.h"
+#include "sim_sms.h"
+
+#include <stdio.h>
 
 struct Time {
     int hour;

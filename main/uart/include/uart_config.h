@@ -1,12 +1,13 @@
 #ifndef UART_CONFIG_H_
 #define UART_CONFIG_H_
 
-#include <stdio.h>
+#include "driver/gpio.h"
+#include "driver/uart.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "driver/uart.h"
-#include "driver/gpio.h"
 #include "sdkconfig.h"
+
+#include <stdio.h>
 
 #define UART_SIM_TXD (5)
 #define UART_SIM_RXD (4)

@@ -1,13 +1,13 @@
 #ifndef UART_TALK_H_
 #define UART_TALK_H_
 
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "driver/uart.h"
-#include <string.h>
-
 #include "uart_config.h"
 
+#include "driver/uart.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
+#include <string.h>
 
 extern bool status;
 

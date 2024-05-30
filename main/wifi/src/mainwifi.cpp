@@ -1,4 +1,4 @@
-#include "../include/mainwifi.h"
+#include "mainwifi.h"
 #include "uart_talk.h"
 
 //Main App;

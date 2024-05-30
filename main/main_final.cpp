@@ -1,19 +1,19 @@
-#include <stdio.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "esp_system.h"
-#include "esp_spi_flash.h"
-#include "sim_sms.h"
-#include "gps_data_parsing.h"
-#include "uart_config.h"
 #include "car_talking.h"
-#include "motion_sensor.h"
 #include "database_talking.h"
 #include "example_wifi.h"
+#include "gps_data_parsing.h"
+#include "motion_sensor.h"
+#include "sim_sms.h"
+#include "uart_config.h"
 #include "values.h"
 #include "wifi/src/http_request.cpp"
 
-//Main App;
+#include "esp_spi_flash.h"
+#include "esp_system.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
+#include <stdio.h>
 
 static void cos(void *arg) {
     //gpio_set_level(GPIO_NUM_15, 0);
@@ -128,5 +128,3 @@ static void cos(void *arg) {
 //     // ESP_LOGI(TAG_WIFI, "ESP_WIFI_MODE_STA");
 //     xTaskCreate(cos, "cos_task", UART_SIM_STACK_SIZE, NULL, 10, NULL);
 // }
-
-
