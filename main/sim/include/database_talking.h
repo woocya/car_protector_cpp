@@ -15,7 +15,7 @@ public:
 
     void activateGPRS();
     char * getDataFromDatabase();
-    void sendDataToDatabase(const char * url);//double lat, double lon
+    void sendDataToDatabase(const char * url);
 };
 
 #endif // DATABASE_TALKING_H_

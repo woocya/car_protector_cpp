@@ -1,7 +1,5 @@
 #include "sim_sms.h"
 
-//Sim::Sim(int where): UartTalk(where) {}
-
 bool Sim::initializeSIM() {
     gpio_reset_pin(GPIO_NUM_19);
     /* Set the GPIO as a push/pull output */
@@ -9,7 +7,6 @@ bool Sim::initializeSIM() {
     gpio_set_level(GPIO_NUM_19, 0);
     vTaskDelay(4000 / portTICK_PERIOD_MS);
     gpio_set_level(GPIO_NUM_19, 1);
-    //gpio_reset_pin(15);
     vTaskDelay(15000 / portTICK_PERIOD_MS);
 
     uartConversation("AT\r", 500);

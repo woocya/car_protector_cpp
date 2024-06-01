@@ -3,7 +3,7 @@
 BluetoothConfig::BluetoothConfig(int where): UartTalk(where) {}
 
 int BluetoothConfig::configure() {
-    uartConversation("AT+BTPOWER=1\r\n", 1000); //UART_SIM_PORT_NUM
+    uartConversation("AT+BTPOWER=1\r\n", 1000);
     uartConversation("AT+BTUNPAIR=1\r\n", 3000);
     int scan_length = uartConversation("AT+BTSCAN=1,10\r\n", 10000);
 

@@ -13,4 +13,4 @@
 
 bool detect_motion();
 
-#endif MOTION_SENSOR_H_
+#endif // MOTION_SENSOR_H_

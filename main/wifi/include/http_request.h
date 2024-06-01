@@ -1,3 +1,6 @@
+#ifndef HTTP_REQUEST_H_
+#define HTTP_REQUEST_H_
+
 #include "uart_config.h"
 
 #include "esp_event.h"
@@ -20,3 +23,5 @@ static const char *TAG = "HTTP_CLIENT";
 esp_err_t _http_event_handler(esp_http_client_event_t *evt);
 
 char * http_rest_with_url(bool request, const char* url);
+
+#endif // HTTP_REQUEST_H_

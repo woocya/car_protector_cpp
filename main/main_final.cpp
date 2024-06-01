@@ -16,7 +16,6 @@
 #include <stdio.h>
 
 static void cos(void *arg) {
-    //gpio_set_level(GPIO_NUM_15, 0);
     uart_config();
 
     Sim sim(UART_SIM_PORT_NUM);
@@ -29,7 +28,6 @@ static void cos(void *arg) {
 
     wifi_init_sta();
     
-    //CarTalking ct(UART_SIM_PORT_NUM);
     DatabaseTalking dt(UART_SIM_PORT_NUM);
     dt.activateGPRS();
 
@@ -113,18 +111,4 @@ static void cos(void *arg) {
 
         vTaskDelay(10000 / portTICK_PERIOD_MS);
     }
-
 }
-
-// extern "C" void app_main(void) // needed for cpp programming
-// {
-//     // esp_err_t ret = nvs_flash_init();
-//     // if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-//     //   ESP_ERROR_CHECK(nvs_flash_erase());
-//     //   ret = nvs_flash_init();
-//     // }
-//     // ESP_ERROR_CHECK(ret);
-
-//     // ESP_LOGI(TAG_WIFI, "ESP_WIFI_MODE_STA");
-//     xTaskCreate(cos, "cos_task", UART_SIM_STACK_SIZE, NULL, 10, NULL);
-// }

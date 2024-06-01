@@ -28,7 +28,4 @@ public:
     CarTalking ct;
 };
 
-
-
-
 #endif // SIM_SMS_H_

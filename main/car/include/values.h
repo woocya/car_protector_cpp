@@ -68,4 +68,4 @@ public:
     void setMotionSensor(bool is_motion);
 };
 
-#endif VALUES_H_
+#endif // VALUES_H_

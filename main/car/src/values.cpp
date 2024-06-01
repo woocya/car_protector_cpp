@@ -67,7 +67,7 @@ void Values::countTimeWithRuntime() {
         time_of_car_start.minute = time_from_GPS.minute - minutes;
     }
 
-    if (hours > time_from_GPS.hour) { //################################# implement handling ends of months and years
+    if (hours > time_from_GPS.hour) {
         date_of_car_start.day = date_from_GPS.day - 1;
         time_of_car_start.hour = 24 - (hours - time_from_GPS.hour - subtract_hour);
     }
@@ -145,38 +145,22 @@ void Values::parse(const char* buffer) {
             i++;
             switch (values_detected) {
                 case 0:
-                    // uart_write_bytes(UART_OBD_PORT_NUM, "case 0\r\n", 8);
-                    // vTaskDelay(200 / portTICK_PERIOD_MS);
                     limit_time_min.hour = buffer[i] - '0';
                     limit_time_min.hour = limit_time_min.hour * 10 + (buffer[i+1] - '0');
                     limit_time_min.minute = buffer[i+3] - '0';
                     limit_time_min.minute = limit_time_min.minute * 10 + (buffer[i+4] - '0');
                     values_detected++;
                     i+=5;
-                    // ch = (char*)malloc(2*sizeof(int) + 18);
-                    // sprintf(ch, "hour: %d, min: %d\r\n", limit_time_min.hour, limit_time_min.minute);
-                    // uart_write_bytes(UART_OBD_PORT_NUM, ch, 50);
-                    // free(ch);
-                    // vTaskDelay(200 / portTICK_PERIOD_MS);
                     break;
                 case 1:
-                    // uart_write_bytes(UART_OBD_PORT_NUM, "case 1\r\n", 8);
-                    // vTaskDelay(200 / portTICK_PERIOD_MS);
                     limit_time_max.hour = buffer[i] - '0';
                     limit_time_max.hour = limit_time_max.hour * 10 + (buffer[i+1] - '0');
                     limit_time_max.minute = buffer[i+3] - '0';
                     limit_time_max.minute = limit_time_max.minute * 10 + (buffer[i+4] - '0');
                     values_detected++;
                     i+=5;
-                    // ch = (char*)malloc(2*sizeof(int) + 18);
-                    // sprintf(ch, "hour: %d, min: %d\r\n", limit_time_max.hour, limit_time_max.minute);
-                    // uart_write_bytes(UART_OBD_PORT_NUM, ch, 50);
-                    // vTaskDelay(200 / portTICK_PERIOD_MS);
-                    // free(ch);
                     break;
                 case 2:
-                    // uart_write_bytes(UART_OBD_PORT_NUM, "case 2\r\n", 8);
-                    // vTaskDelay(200 / portTICK_PERIOD_MS);
                     x = i;
                     helper_string = buffer[x];
                     x++;
@@ -197,17 +181,9 @@ void Values::parse(const char* buffer) {
                     
                     values_detected++;
                     i+=(x-i);
-
-                    // ch = (char*)malloc(657);
-                    // sprintf(ch, "min lat: %f, min lon: %f\r\n", limit_latitude_min, limit_longitude_min);
-                    // uart_write_bytes(UART_OBD_PORT_NUM, ch, 50);
-                    // free(ch);
-                    // vTaskDelay(200 / portTICK_PERIOD_MS);
                     
                     break;
                 case 3:
-                    // uart_write_bytes(UART_OBD_PORT_NUM, "case 3\r\n", 8);
-                    // vTaskDelay(200 / portTICK_PERIOD_MS);
                     x = i;
                     helper_string = buffer[x];
                     x++;
@@ -229,42 +205,20 @@ void Values::parse(const char* buffer) {
                     values_detected++;
                     i+=(x-i);
 
-                    // ch = (char*)malloc(657);
-                    // sprintf(ch, "min lat: %f, min lon: %f\r\n", limit_latitude_max, limit_longitude_max);
-                    // uart_write_bytes(UART_OBD_PORT_NUM, ch, 50);
-                    // free(ch);
-                    // vTaskDelay(200 / portTICK_PERIOD_MS);
-
                     break;
                 case 4:
-                    // uart_write_bytes(UART_OBD_PORT_NUM, "case 4\r\n", 8);
-                    // vTaskDelay(200 / portTICK_PERIOD_MS);
                     limit_motion_sensor = buffer[i];
                     values_detected++;
                     i++;
 
-                    // ch = (char*)malloc(sizeof(int) + 15);
-                    // sprintf(ch, "motion: %d\r\n", limit_motion_sensor);
-                    // uart_write_bytes(UART_OBD_PORT_NUM, ch, 50);
-                    // free(ch);
-                    // vTaskDelay(200 / portTICK_PERIOD_MS);
-
                     break;
                 case 5:
-                    // uart_write_bytes(UART_OBD_PORT_NUM, "case 5\r\n", 8);
-                    // vTaskDelay(200 / portTICK_PERIOD_MS);
                     for(x = 0; x < 9; x++) {
                         telephone_number[x] = buffer[i+x];
                     }
 
                     values_detected++;
                     i+=9;
-
-                    // ch = (char*)malloc(18);
-                    // sprintf(ch, "tel: %s\r\n", telephone_number);
-                    // uart_write_bytes(UART_OBD_PORT_NUM, ch, 18);
-                    // free(ch);
-                    // vTaskDelay(200 / portTICK_PERIOD_MS);
 
                     break;
                 default:
@@ -296,7 +250,3 @@ void Values::setDateOfCar(int year, int month, int day) {
     date_of_car_start.month = month;
     date_of_car_start.day = day;
 }
-
-// void Values::setMotionSensor(bool is_motion) {
-//     this->motion_sensor = is_motion;
-// }

@@ -6,6 +6,9 @@
    software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
    CONDITIONS OF ANY KIND, either express or implied.
 */
+#ifndef CONFIG_WIFI_H_
+#define CONFIG_WIFI_H_
+
 #include "uart_talk.h"
 
 #include "esp_event.h"
@@ -63,3 +66,5 @@ static void event_handler(void* arg, esp_event_base_t event_base,
                                 int32_t event_id, void* event_data);
 
 EventGroupHandle_t wifi_init_sta(void);
+
+#endif // CONFIG_WIFI_H_

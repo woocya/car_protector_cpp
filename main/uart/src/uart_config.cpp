@@ -23,9 +23,6 @@ void uart_config()
     };
     int intr_alloc_flags = 0;
     
-#if CONFIG_UART_ISR_IN_IRAM
-    intr_alloc_flags = ESP_INTR_FLAG_IRAM;
-#endif
     ESP_ERROR_CHECK(uart_driver_install(UART_OBD_PORT_NUM, UART_BUF_SIZE * 2, 0, 0, NULL, intr_alloc_flags));
     ESP_ERROR_CHECK(uart_param_config(UART_OBD_PORT_NUM, &uart_obd_config));
     ESP_ERROR_CHECK(uart_set_pin(UART_OBD_PORT_NUM, UART_OBD_TXD, UART_OBD_RXD, UART_RTS, UART_CTS));

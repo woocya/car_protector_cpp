@@ -95,8 +95,7 @@ float CarTalking::askEngineSpeed() {
     }
     else {
         return 0.0;
-    }
-    
+    }    
 }
 
 int CarTalking::askVehicleSpeed() {
@@ -298,15 +297,5 @@ void CarTalking::readAndProcessMessage(const char* command_to_send, int len_of_c
         else {
             i++;
         }
-        // char num = buffer_index + '0';
-        // uart_write_bytes(UART_OBD_PORT_NUM, "\r\n", 2);
-        // uart_write_bytes(UART_OBD_PORT_NUM, &num, 1);
-        // uart_write_bytes(UART_OBD_PORT_NUM, "\r\n", 2);
-        // vTaskDelay(100 / portTICK_PERIOD_MS);
     }
 }
-
-
-// ustawić duży bufor, brać wszystko a potem czytać do /r i >, potem ew. zerować resztę - zrobione
-// uart read - chyba lepiej pętla dla sprawdzania końca linii - zrobione
-// error parsing

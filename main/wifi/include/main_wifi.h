@@ -1,3 +1,6 @@
+#ifndef MAIN_WIFI_H_
+#define MAIN_WIFI_H_
+
 #include "wifi.h"
 
 #include "freertos/FreeRTOS.h"
@@ -17,3 +20,5 @@ public:
     WIFI::Wifi::state_e wifiState { WIFI::Wifi::state_e::NOT_INITIALIZED };
     WIFI::Wifi Wifi;
 };
+
+#endif // MAIN_WIFI_H_

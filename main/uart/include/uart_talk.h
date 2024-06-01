@@ -23,5 +23,4 @@ public:
     uint8_t* buffer;
 };
 
-
 #endif // UART_TALK_H_
