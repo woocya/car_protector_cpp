@@ -11,7 +11,7 @@ UartTalk::~UartTalk() {
     free(buffer);
 }
 
-int UartTalk::UartConversation(const char *command, int wait_for) {
+int UartTalk::uartConversation(const char *command, int wait_for) {
     int len = 0;
 
     uart_write_bytes(where, command, strlen(command));

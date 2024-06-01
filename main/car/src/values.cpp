@@ -108,11 +108,11 @@ int Values::compareTime(Time a, Time b) {
 }
 
 void Values::compareAndWarn(Sim &sim) {
-    sim.SetTelephoneNumber(telephone_number);
+    sim.setTelephoneNumber(telephone_number);
     if ((compareTime(time_from_GPS, limit_time_min) == -1 || compareTime(time_from_GPS, limit_time_max) == 1)) {
         
         uart_write_bytes(UART_OBD_PORT_NUM, "time surpassed\r\n", 16);
-        sim.SendSMS("Uwaga! Pojazd aktywny w niedozwolonym czasie!");
+        sim.sendSMS("Uwaga! Pojazd aktywny w niedozwolonym czasie!");
     }
 
     if (latitude < limit_latitude_min || latitude > limit_latitude_max || longitude < limit_longitude_min || longitude > limit_longitude_max) {
@@ -120,14 +120,14 @@ void Values::compareAndWarn(Sim &sim) {
         uart_write_bytes(UART_OBD_PORT_NUM, "location surpassed\r\n", 20);
         char * message = (char*)malloc(313);
         sprintf(message, "Uwaga! Pojazd przekroczyl dopuszczalna strefe! Wspolrzedne to %.6lf %.6lf", latitude, longitude);
-        sim.SendSMS(message);
+        sim.sendSMS(message);
         free(message);
     }
 
     if (motion_sensor && !limit_motion_sensor) {
         
         uart_write_bytes(UART_OBD_PORT_NUM, "motion surpassed\r\n", 18);
-        sim.SendSMS("Uwaga! Wykryto ruch przy pojezdzie!");
+        sim.sendSMS("Uwaga! Wykryto ruch przy pojezdzie!");
     }
 }
 

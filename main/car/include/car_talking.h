@@ -26,29 +26,21 @@ protected:
 public:
     CarTalking(int where): UartTalk(where), bt(where) {}
 
-    BluetoothConfig bt;
-
     void configureBluetooth();
-
-    void ReadAndProcessMessage(const char* command_to_send, int len_of_command, char * buffer_to_read, int size_of_read_buffer, int wait_for, bool skip_info = false); // read data with uart
-
-    bool GetObdStarted();
-
-    bool SetProtocol();
-
-    void CheckAvailableParams();
-
-    void CheckPidsSupported(uint8_t* command_set, int size); // check if given vehicle support necessary pids
-
-    bool AskPids1();
-    bool AskPids2();
-
+    void readAndProcessMessage(const char* command_to_send, int len_of_command, char * buffer_to_read, int size_of_read_buffer, int wait_for, bool skip_info = false); // read data with uart
+    bool getObdStarted();
+    bool setProtocol();
+    void checkAvailableParams();
+    void checkPidsSupported(uint8_t* command_set, int size); // check if given vehicle support necessary pids
+    bool askPids1();
+    bool askPids2();
     unsigned char* getActivePids();
+    float askEngineSpeed();
+    int askVehicleSpeed();
+    int askRuntime();
+    float askFuelLevel();
 
-    float AskEngineSpeed();
-    int AskVehicleSpeed();
-    int AskRuntime();
-    float AskFuelLevel();
+    BluetoothConfig bt;
 };
 
 #endif // CAR_TALKING_H_

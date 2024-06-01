@@ -3,16 +3,16 @@
 GPSParsing::GPSParsing(int where): UartTalk(where) {
 }
 
-void GPSParsing::ActivateGps() {
-    len = GPSParsing::UartConversation("AT+CGNSPWR=1\r", 500);
+void GPSParsing::activateGps() {
+    len = GPSParsing::uartConversation("AT+CGNSPWR=1\r", 500);
 }
 
-void GPSParsing::GetData() {
-    len = GPSParsing::UartConversation("AT+CGNSINF\r", 10000);
+void GPSParsing::getData() {
+    len = GPSParsing::uartConversation("AT+CGNSINF\r", 10000);
     vTaskDelay(1000 / portTICK_PERIOD_MS);
 }
 
-void GPSParsing::ParseData() {
+void GPSParsing::parseData() {
     float year = 0;
     float month = 0;
     float day = 0;
@@ -177,54 +177,54 @@ void GPSParsing::ParseData() {
     }    
 }
 
-int GPSParsing::GetGNSSStatus() {
+int GPSParsing::getGNSSStatus() {
     return gps_data["GNSS run status"];
 }
 
-int GPSParsing::GetFixStatus() {
+int GPSParsing::getFixStatus() {
     return gps_data["Fix status"];
 }
 
-int GPSParsing::GetYear() {
+int GPSParsing::getYear() {
     return gps_data["year"];
 }
 
-int GPSParsing::GetMonth() {
+int GPSParsing::getMonth() {
     return gps_data["month"];
 }
 
-int GPSParsing::GetDay() {
+int GPSParsing::getDay() {
     return gps_data["day"];
 }
 
-int GPSParsing::GetHour() {
+int GPSParsing::getHour() {
     return gps_data["hour"];
 }
 
-int GPSParsing::GetMinute() {
+int GPSParsing::getMinute() {
     return gps_data["minute"];
 }
 
-int GPSParsing::GetSecond() {
+int GPSParsing::getSecond() {
     return gps_data["second"];
 }
 
-float GPSParsing::GetLatitude() {
+float GPSParsing::getLatitude() {
     return gps_data["latitude"];
 }
 
-float GPSParsing::GetLongitude() {
+float GPSParsing::getLongitude() {
     return gps_data["longitude"];
 }
 
-float GPSParsing::GetAltitude() {
+float GPSParsing::getAltitude() {
     return gps_data["MLS altitude"];
 }
 
-float GPSParsing::GetSpeed() {
+float GPSParsing::getSpeed() {
     return gps_data["speed"];
 }
 
-void GPSParsing::SetFixStatus(int status) {
+void GPSParsing::setFixStatus(int status) {
     gps_data["Fix status"] = status;
 }

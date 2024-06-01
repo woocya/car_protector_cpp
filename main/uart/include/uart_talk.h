@@ -15,10 +15,12 @@ class UartTalk {
 protected:    
     int where;
 public:
-    uint8_t* buffer;
     UartTalk(int where);
+
     ~UartTalk();
-    int UartConversation(const char *command, int wait_for);
+    int uartConversation(const char *command, int wait_for);
+
+    uint8_t* buffer;
 };
 
 

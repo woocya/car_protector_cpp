@@ -13,11 +13,9 @@ private:
 public:
     DatabaseTalking(int where);
 
-    void ActivateGPRS();
-
-    char * GetDataFromDatabase();
-
-    void SendDataToDatabase(const char * url);//double lat, double lon
+    void activateGPRS();
+    char * getDataFromDatabase();
+    void sendDataToDatabase(const char * url);//double lat, double lon
 };
 
 #endif // DATABASE_TALKING_H_

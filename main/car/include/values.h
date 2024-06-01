@@ -47,42 +47,24 @@ public:
     }
 
     void setTime(int hour, int minute);
-
     void setDate(int year, int month, int day);
-
-    void setActive(bool is_active);
-    
+    void setActive(bool is_active);    
     void setCarSpeed(int speed);
-
     void setFuelLevel(float level);
-
     float getFuelLevel();
-
     void setRuntime(int runtime);
-
     int getRuntime();
-
     void countTimeWithRuntime();
-
     void setLatitude(double latitude);
-
     void setLongitude(double longitude);
-
     void setMotionSensor();
-
     int compareTime(Time a, Time b);
-
     void compareAndWarn(Sim &sim);
-
     void parse(const char* buffer);
-
     char * constructPostMessage();
 
-
     void setTimeOfCar(int hour, int minute);
-
     void setDateOfCar(int year, int month, int day);
-
     void setMotionSensor(bool is_motion);
 };
 

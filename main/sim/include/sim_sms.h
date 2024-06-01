@@ -19,12 +19,13 @@ protected:
     char* server_name;
     char telephone_number[9];
 public:
-    CarTalking ct;
     Sim(int where): UartTalk(where), ct(where) {}
 
-    void SetTelephoneNumber(char telephone_number[9]);
-    bool InitializeSIM();
-    bool SendSMS(const char * what_to_send);
+    void setTelephoneNumber(char telephone_number[9]);
+    bool initializeSIM();
+    bool sendSMS(const char * what_to_send);
+
+    CarTalking ct;
 };
 
 

@@ -17,23 +17,23 @@ private:
     std::map<std::string, float> gps_data = {{"GNSS run status", 2}, {"Fix status", 0}, {"year", 0}, {"month", 0}, {"day", 0}, {"hour", 0}, {"minute", 0}, {"second", 0}, {"latitude", 0}, {"longitude", 0}, {"MLS altitude", 0}, {"speed", 0}};
 public:
     GPSParsing(int where);
-    void ActivateGps();
-    void GetData();
-    void ParseData();
-    int GetGNSSStatus();
-    int GetFixStatus();
-    int GetYear();
-    int GetMonth();
-    int GetDay();
-    int GetHour();
-    int GetMinute();
-    int GetSecond();
-    float GetLatitude();
-    float GetLongitude();
-    float GetAltitude();
-    float GetSpeed();
-
-    void SetFixStatus(int status);
+    
+    void activateGps();
+    void getData();
+    void parseData();
+    int getGNSSStatus();
+    int getFixStatus();
+    int getYear();
+    int getMonth();
+    int getDay();
+    int getHour();
+    int getMinute();
+    int getSecond();
+    float getLatitude();
+    float getLongitude();
+    float getAltitude();
+    float getSpeed();
+    void setFixStatus(int status);
 
     int len;
 };

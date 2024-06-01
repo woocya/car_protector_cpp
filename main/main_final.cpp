@@ -20,18 +20,18 @@ static void cos(void *arg) {
     uart_config();
 
     Sim sim(UART_SIM_PORT_NUM);
-    sim.InitializeSIM();
+    sim.initializeSIM();
 
-    sim.ct.bt.Configure();
+    sim.ct.bt.configure();
 
-    sim.ct.GetObdStarted();
-    sim.ct.SetProtocol();
+    sim.ct.getObdStarted();
+    sim.ct.setProtocol();
 
     wifi_init_sta();
     
     //CarTalking ct(UART_SIM_PORT_NUM);
     DatabaseTalking dt(UART_SIM_PORT_NUM);
-    dt.ActivateGPRS();
+    dt.activateGPRS();
 
     GPSParsing gps(UART_SIM_PORT_NUM);
 
@@ -52,16 +52,16 @@ static void cos(void *arg) {
             limits_buffer = http_rest_with_url(0, nullptr);
         }
         else if (bits & WIFI_FAIL_BIT) {
-            limits_buffer = dt.GetDataFromDatabase();
+            limits_buffer = dt.getDataFromDatabase();
         }
 
         values.parse(limits_buffer);
         
-        if (sim.ct.GetObdStarted() != true) {
+        if (sim.ct.getObdStarted() != true) {
             esp_restart();
         }
 
-        sim.ct.CheckAvailableParams();
+        sim.ct.checkAvailableParams();
         
         unsigned char* pids;
         pids = sim.ct.getActivePids();
@@ -69,16 +69,16 @@ static void cos(void *arg) {
             if (pids[num_of_param] & 1) {
                 switch(num_of_param) {
                     case 0:
-                        values.setActive(sim.ct.AskEngineSpeed());
+                        values.setActive(sim.ct.askEngineSpeed());
                         break;
                     case 1:
-                        values.setCarSpeed(sim.ct.AskVehicleSpeed());
+                        values.setCarSpeed(sim.ct.askVehicleSpeed());
                         break;
                     case 2:
-                        values.setFuelLevel(sim.ct.AskFuelLevel());
+                        values.setFuelLevel(sim.ct.askFuelLevel());
                         break;
                     case 3:
-                        values.setRuntime(sim.ct.AskRuntime());
+                        values.setRuntime(sim.ct.askRuntime());
                         break;
                     default:
                         break;
@@ -88,14 +88,14 @@ static void cos(void *arg) {
 
         values.setMotionSensor();
 
-        gps.ActivateGps();
-        gps.GetData();
-        gps.ParseData();
+        gps.activateGps();
+        gps.getData();
+        gps.parseData();
 
-        values.setDate(gps.GetYear(), gps.GetMonth(), gps.GetDay());
-        values.setTime(gps.GetHour(), gps.GetMinute());
-        values.setLatitude(gps.GetLatitude());
-        values.setLongitude(gps.GetLongitude());
+        values.setDate(gps.getYear(), gps.getMonth(), gps.getDay());
+        values.setTime(gps.getHour(), gps.getMinute());
+        values.setLatitude(gps.getLatitude());
+        values.setLongitude(gps.getLongitude());
 
         if (values.getRuntime() != -1) {
             values.countTimeWithRuntime();
