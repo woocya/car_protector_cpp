@@ -66,7 +66,6 @@ unsigned char* CarTalking::getActivePids() {
 
 float CarTalking::askEngineSpeed() {
     char buffer_to_read[9];
-    std::string helper_string;
     std::stringstream ss;
     int first_number;
     int second_number;
@@ -74,18 +73,12 @@ float CarTalking::askEngineSpeed() {
     readAndProcessMessage("010C\r", 5, buffer_to_read, 9, 15000, true);
 
     if (status == 0) {
-        helper_string = buffer_to_read[4];
-        helper_string += buffer_to_read[5];
-
-        ss << std::hex << helper_string;
+        ss << std::hex << buffer_to_read[4] << buffer_to_read[5];
         ss >> first_number;
 
         std::stringstream().swap(ss);
 
-        helper_string = buffer_to_read[7];
-        helper_string += buffer_to_read[8];
-
-        ss << std::hex << helper_string;
+        ss << std::hex << buffer_to_read[7] << buffer_to_read[8];
         ss >> second_number;
 
         return (float(first_number) * 256 + float(second_number)) / 4;
@@ -100,17 +93,13 @@ float CarTalking::askEngineSpeed() {
 
 int CarTalking::askVehicleSpeed() {
     char buffer_to_read[6];
-    std::string helper_string;
     std::stringstream ss;
     int number;
 
     readAndProcessMessage("010D\r", 5, buffer_to_read, 6, 15000, true);
 
     if (status == 0) {
-        helper_string = buffer_to_read[4];
-        helper_string += buffer_to_read[5];
-
-        ss << std::hex << helper_string;
+        ss << std::hex << buffer_to_read[4] << buffer_to_read[5];
         ss >> number;
 
         return number;
@@ -124,8 +113,7 @@ int CarTalking::askVehicleSpeed() {
 }
 
 int CarTalking::askRuntime() {
-    char buffer_to_read[9];    
-    std::string helper_string;
+    char buffer_to_read[9];
     std::stringstream ss;
     int first_number;
     int second_number;
@@ -133,18 +121,12 @@ int CarTalking::askRuntime() {
     readAndProcessMessage("011F\r", 5, buffer_to_read, 9, 10000, true);
 
     if (status == 0) {
-        helper_string = buffer_to_read[4];
-        helper_string += buffer_to_read[5];
-
-        ss << std::hex << helper_string;
+        ss << std::hex << buffer_to_read[4] << buffer_to_read[5];
         ss >> first_number;
 
         std::stringstream().swap(ss);
-
-        helper_string = buffer_to_read[7];
-        helper_string += buffer_to_read[8];
-
-        ss << std::hex << helper_string;
+        
+        ss << std::hex << buffer_to_read[7] << buffer_to_read[8];
         ss >> second_number;
 
         return (int)first_number * 256 + (int)second_number;
@@ -159,17 +141,13 @@ int CarTalking::askRuntime() {
 
 float CarTalking::askFuelLevel() {
     char buffer_to_read[6];
-    std::string helper_string;
     std::stringstream ss;
     int number;
 
     readAndProcessMessage("012F\r", 5, buffer_to_read, 6, 10000, true);
 
-    if (status == 0) {
-        helper_string = buffer_to_read[4];
-        helper_string += buffer_to_read[5];
-
-        ss << std::hex << helper_string;
+    if (status == 0) {        
+        ss << std::hex << buffer_to_read[4] << buffer_to_read[5];
         ss >> number;
 
         return ((float)number * 100) / 255;
@@ -185,7 +163,6 @@ float CarTalking::askFuelLevel() {
 
 void CarTalking::checkPidsSupported(uint8_t* command_set, int size) {
     char buffer_to_read[15];
-    std::string helper_string;
     std::stringstream ss;
     char actual_bits[4];
 
@@ -194,47 +171,33 @@ void CarTalking::checkPidsSupported(uint8_t* command_set, int size) {
     for(int i = 0; i < 2; i++) {
         readAndProcessMessage(pids[i].c_str(), 5, buffer_to_read, 12, 10000, true);
 
-        helper_string = buffer_to_read[4];
-        helper_string += buffer_to_read[5];
-
-        ss << std::hex << helper_string;
+        ss << std::hex << buffer_to_read[4] << buffer_to_read[5];
         ss >> actual_bits[0];
 
         std::stringstream().swap(ss);
 
-        helper_string = buffer_to_read[7];
-        helper_string += buffer_to_read[8];
-
-        ss << std::hex << helper_string;
+        ss << std::hex << buffer_to_read[7] << buffer_to_read[8];
         ss >> actual_bits[1];
 
         std::stringstream().swap(ss);
 
-        helper_string = buffer_to_read[10];
-        helper_string += buffer_to_read[11];
-
-        ss << std::hex << helper_string;
+        ss << std::hex << buffer_to_read[10] << buffer_to_read[11];
         ss >> actual_bits[2];
 
         std::stringstream().swap(ss);
 
-        helper_string = buffer_to_read[13];
-        helper_string += buffer_to_read[14];
-
-        ss << std::hex << helper_string;
+        ss << std::hex << buffer_to_read[13] << buffer_to_read[14];
         ss >> actual_bits[3];
 
-        std::stringstream().swap(ss);
-
-            for (int j = 0; j < size; j++) {
-                if ((actual_bits[(command_set[j] / 8) + 4] >> (command_set[j] % 8)) & 1) {
-                    if (size == 1) {
-                        active_pids[3] |= checked_pids[3];
-                        return;
-                    }
-                    active_pids[i] |= checked_pids[i];
+        for (int j = 0; j < size; j++) {
+            if ((actual_bits[(command_set[j] / 8) + 4] >> (command_set[j] % 8)) & 1) {
+                if (size == 1) {
+                    active_pids[3] |= checked_pids[3];
+                    return;
                 }
+                active_pids[i] |= checked_pids[i];
             }
+        }
     }
 }
 
