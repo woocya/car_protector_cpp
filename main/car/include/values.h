@@ -19,25 +19,28 @@ struct Date {
 
 class Values {
 protected:
-    Time time_from_GPS;
-    Time time_of_car_start;
-    Date date_from_GPS;
-    Date date_of_car_start;
-    bool is_active;
     int car_speed;
+    Date date_of_car_start;
     float fuel_level;
+    bool is_active;
     int runtime;
+    Time time_of_car_start;
+
+    Date date_from_GPS;
     double latitude;
     double longitude;
+    Time time_from_GPS;
+
     bool motion_sensor;
 
+    double limit_latitude_max;
+    double limit_latitude_min;
+    double limit_longitude_max;
+    double limit_longitude_min;
+    bool limit_motion_sensor;
     Time limit_time_min;
     Time limit_time_max;
-    double limit_latitude_min;
-    double limit_latitude_max;
-    double limit_longitude_min;
-    double limit_longitude_max;
-    bool limit_motion_sensor;
+
     char telephone_number[9];
 
 public:
@@ -46,26 +49,29 @@ public:
         setRuntime(-1);
     }
 
-    void setTime(int hour, int minute);
-    void setDate(int year, int month, int day);
-    void setActive(bool is_active);    
-    void setCarSpeed(int speed);
-    void setFuelLevel(float level);
     float getFuelLevel();
-    void setRuntime(int runtime);
     int getRuntime();
-    void countTimeWithRuntime();
+    
+    void setActive(bool is_active);
+    void setCarSpeed(int speed);
+    void setDate(int year, int month, int day);
+    void setFuelLevel(float level);
     void setLatitude(double latitude);
     void setLongitude(double longitude);
     void setMotionSensor();
-    int compareTime(Time a, Time b);
+    void setRuntime(int runtime);
+    void setTime(int hour, int minute);
+    
     void compareAndWarn(Sim &sim);
+    int compareTime(Time a, Time b);
+    void countTimeWithRuntime();
     void parse(const char* buffer);
-    char * constructPostMessage();
 
-    void setTimeOfCar(int hour, int minute);
     void setDateOfCar(int year, int month, int day);
     void setMotionSensor(bool is_motion);
+    void setTimeOfCar(int hour, int minute);
+
+    char * constructPostMessage();
 };
 
 #endif // VALUES_H_

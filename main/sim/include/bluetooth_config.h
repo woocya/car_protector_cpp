@@ -13,9 +13,9 @@ public:
     BluetoothConfig(int where);
 
     int configure();
+    int parseResponse(const char * expected_response);
     int parseScanning(int scan_length);
     std::pair<int, uint8_t*> sendCommand(const char * command, int len_of_command, int wait_for);
-    int parseResponse(const char * expected_response);
 };
 
 #endif // BLUETOOTH_CONFIG_H_

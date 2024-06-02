@@ -19,21 +19,22 @@ public:
     GPSParsing(int where);
     
     void activateGps();
-    void getData();
     void parseData();
-    int getGNSSStatus();
-    int getFixStatus();
-    int getYear();
-    int getMonth();
+    void setFixStatus(int status);
+    
+    float getAltitude();
+    void getData();
     int getDay();
+    int getFixStatus();
+    int getGNSSStatus();
     int getHour();
-    int getMinute();
-    int getSecond();
     float getLatitude();
     float getLongitude();
-    float getAltitude();
+    int getMinute();
+    int getMonth();
+    int getSecond();
     float getSpeed();
-    void setFixStatus(int status);
+    int getYear();
 
     int len;
 };

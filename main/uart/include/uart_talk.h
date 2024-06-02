@@ -16,8 +16,8 @@ protected:
     int where;
 public:
     UartTalk(int where);
-
     ~UartTalk();
+    
     int uartConversation(const char *command, int wait_for);
 
     uint8_t* buffer;
